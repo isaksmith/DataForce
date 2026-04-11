@@ -1,0 +1,36 @@
+[[pages]]
+path = "DataForce.py"
+name = "DataForce Summary"
+icon = ":material/home:"
+
+[[pages]]
+path = "pages/1_Branches.py"
+name = "Branches"
+
+[[pages]]
+path = "pages/2_Customers.py"
+name = "Customers"
+
+[[pages]]
+path = "pages/3_Digital_Sessions.py"
+name = "Digital Sessions"
+
+[[pages]]
+path = "pages/4_Error_Codes.py"
+name = "Error Codes"
+
+[[pages]]
+path = "pages/5_Feature_Costs.py"
+name = "Feature Costs"
+
+[[pages]]
+path = "pages/6_Support_Interactions.py"
+name = "Support Interactions"
+
+[[pages]]
+path = "pages/7_DataForce_Shiny_Explorer.py"
+name = "DataForce Shiny Explorer"
+
+[[pages]]
+path = "pages/8_DataForce_Terminal.py"
+name = "DataForce Terminal"

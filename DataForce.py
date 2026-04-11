@@ -4,7 +4,7 @@ from dataforce_utils import DATASETS
 
 st.set_page_config(page_title="DataForce Explorer", layout="wide")
 
-st.title("DataForce Explorer")
+st.title("Overview")
 st.caption("Explore every Hack The Plains 2026 dataset through Python pages, with matching R/Shiny starter guidance.")
 
 st.markdown("### Available pages")
