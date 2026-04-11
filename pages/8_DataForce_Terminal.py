@@ -71,9 +71,9 @@ folium.Choropleth(
     fill_color="YlOrBr",
     fill_opacity=0.82,
     line_opacity=0.45,
-  line_color="#fbbf24",
-  line_weight=1.8,
-    legend_name="Branch Count",
+    line_color="#fbbf24",
+    line_weight=1.8,
+    legend_name="Branch Data",
 ).add_to(terminal_map)
 
 for point in state_points:
@@ -142,6 +142,43 @@ terminal_map.get_root().html.add_child(folium.Element("""
   box-shadow: none !important;
   font-family: 'VT323', monospace !important;
 }
+.legend,
+.legend *,
+.legend-title,
+.legend-scale,
+.legend-labels,
+.legend-labels * {
+  color: #fcd34d !important;
+  fill: #fcd34d !important;
+  font-family: 'VT323', monospace !important;
+}
+.legend {
+  background: rgba(0, 0, 0, 0.88) !important;
+  border: 1px solid #f59e0b !important;
+  padding: 4px 6px !important;
+  box-shadow: none !important;
+  font-size: 9px !important;
+}
+.legend-title {
+  font-size: 10px !important;
+  letter-spacing: 0.08em !important;
+  margin-bottom: 2px !important;
+}
+.legend-labels,
+.legend-labels span,
+.legend-scale ul li,
+.legend-scale ul {
+  font-size: 8px !important;
+}
+.legend-scale ul {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.legend-scale ul li span {
+  border-color: rgba(251, 191, 36, 0.25) !important;
+  height: 8px !important;
+  width: 18px !important;
+}
 </style>
 """))
 
@@ -195,15 +232,15 @@ st.markdown(
     }
     .ticker-track {
       display: inline-block;
-      padding-left: 100%;
-      animation: ticker-scroll 24s linear infinite;
+      padding-left: 12%;
+      animation: ticker-scroll 18s linear infinite;
     }
     .ticker-item {
       display: inline-block;
       color: #67e8f9;
       font-size: 1rem;
       letter-spacing: 0.15em;
-      margin-right: 3rem;
+      margin-right: 1.25rem;
     }
     @keyframes ticker-scroll {
       0% { transform: translateX(0); }
