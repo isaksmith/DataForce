@@ -232,7 +232,7 @@ st.markdown(
     }
     .ticker-track {
       display: inline-block;
-      padding-left: 12%;
+      padding-left: 3%;
       animation: ticker-scroll 18s linear infinite;
     }
     .ticker-item {

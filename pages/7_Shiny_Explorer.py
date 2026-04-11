@@ -7,7 +7,7 @@ from dataforce_utils import apply_global_font, DATASETS, load_csv
 
 apply_global_font()
 
-st.title("DataForce Shiny Explorer")
+st.title("Shiny Explorer")
 st.caption("A cloned explorer page modeled directly after the Shiny app: dataset selector, optional filter, summary stats, primary chart, and table preview.")
 
 selected = st.selectbox("Dataset", list(DATASETS.keys()))

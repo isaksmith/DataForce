@@ -28,8 +28,8 @@ path = "pages/6_Support_Interactions.py"
 name = "Support Interactions"
 
 [[pages]]
-path = "pages/7_DataForce_Shiny_Explorer.py"
-name = "DataForce Shiny Explorer"
+path = "pages/7_Shiny_Explorer.py"
+name = "Shiny Explorer"
 
 [[pages]]
 path = "pages/8_DataForce_Terminal.py"
