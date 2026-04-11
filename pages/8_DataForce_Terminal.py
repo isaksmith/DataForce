@@ -186,12 +186,49 @@ st.markdown(
         color: #fde68a;
         font-weight: 700;
     }
+    .ticker-wrap {
+      overflow: hidden;
+      border: 1px solid #f59e0b;
+      background: #000000;
+      margin-bottom: 0.75rem;
+      white-space: nowrap;
+    }
+    .ticker-track {
+      display: inline-block;
+      padding-left: 100%;
+      animation: ticker-scroll 24s linear infinite;
+    }
+    .ticker-item {
+      display: inline-block;
+      color: #67e8f9;
+      font-size: 1rem;
+      letter-spacing: 0.15em;
+      margin-right: 3rem;
+    }
+    @keyframes ticker-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-st.markdown("<div class='terminal-shell'>", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div class="ticker-wrap">
+      <div class="ticker-track">
+        <span class="ticker-item">LIVE TELEMETRY // TOTAL SESSIONS 2,000,000</span>
+        <span class="ticker-item">SESSION ALERT // FAILED TRANSACTIONS 4.8%</span>
+        <span class="ticker-item">ERROR FEED // ERR_AUTH 15K</span>
+        <span class="ticker-item">ERROR FEED // ERR_TIMEOUT 8K</span>
+        <span class="ticker-item">SUPPORT ALERT // LIVE TICKETS 65,000</span>
+        <span class="ticker-item">SYSTEM STATUS // INTERVENTION REQUIRED</span>
+      </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 st.markdown(
     """
     <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid #f59e0b; background:#000; padding:0.9rem 1rem; margin-bottom:1rem;">
@@ -238,5 +275,3 @@ with right:
     st.markdown("<div class='terminal-card'><div class='terminal-label'>SUPPORT SATURATION</div><div class='terminal-value'>LIVE TICKETS: 65,000</div><div class='terminal-value'>AGENT LOAD: 92%</div></div>", unsafe_allow_html=True)
     st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
     st.markdown("<div class='terminal-card'><div class='terminal-label'>TARGET VETO</div><div style='border:1px solid #ef4444; background:#450a0a; color:#fca5a5; padding:1rem; text-align:center; font-size:1.4rem; font-weight:800;'>CHURN RISK DETECTED: HIGH</div></div>", unsafe_allow_html=True)
-
-st.markdown("</div>", unsafe_allow_html=True)
