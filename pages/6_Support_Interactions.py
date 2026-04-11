@@ -1,7 +1,9 @@
 import plotly.express as px
 import streamlit as st
 
-from dataforce_utils import add_download, load_csv, plot_value_counts, render_overview, render_preview, render_r_blurb
+from dataforce_utils import apply_global_font, add_download, load_csv, plot_value_counts, render_overview, render_preview, render_r_blurb
+
+apply_global_font()
 
 st.title("Support Interactions")
 df = load_csv("support_interactions.csv")

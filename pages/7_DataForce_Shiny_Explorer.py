@@ -3,7 +3,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from dataforce_utils import DATASETS, load_csv
+from dataforce_utils import apply_global_font, DATASETS, load_csv
+
+apply_global_font()
 
 st.title("DataForce Shiny Explorer")
 st.caption("A cloned explorer page modeled directly after the Shiny app: dataset selector, optional filter, summary stats, primary chart, and table preview.")

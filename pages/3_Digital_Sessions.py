@@ -2,7 +2,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from dataforce_utils import add_download, load_csv, plot_value_counts, render_overview, render_preview, render_r_blurb
+from dataforce_utils import apply_global_font, add_download, load_csv, plot_value_counts, render_overview, render_preview, render_r_blurb
+
+apply_global_font()
 
 st.title("Digital Sessions")
 df = load_csv("digital_sessions.csv")

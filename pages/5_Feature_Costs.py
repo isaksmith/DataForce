@@ -1,7 +1,9 @@
 import plotly.express as px
 import streamlit as st
 
-from dataforce_utils import add_download, load_csv, render_overview, render_preview, render_r_blurb
+from dataforce_utils import apply_global_font, add_download, load_csv, render_overview, render_preview, render_r_blurb
+
+apply_global_font()
 
 st.title("Feature Costs")
 df = load_csv("feature_costs.csv")

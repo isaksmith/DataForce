@@ -1,8 +1,9 @@
 import streamlit as st
 
-from dataforce_utils import DATASETS
+from dataforce_utils import DATASETS, apply_global_font
 
 st.set_page_config(page_title="DataForce Explorer", layout="wide")
+apply_global_font()
 
 st.title("Overview")
 st.caption("Explore every Hack The Plains 2026 dataset through Python pages, with matching R/Shiny starter guidance.")

@@ -4,6 +4,24 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+
+def apply_global_font() -> None:
+    st.markdown(
+        """
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+        html, body, [class*="css"], [data-testid="stAppViewContainer"],
+        [data-testid="stSidebar"], [data-testid="stMarkdownContainer"],
+        [data-testid="stMetricValue"], [data-testid="stMetricLabel"],
+        button, input, textarea, select {
+            font-family: 'IBM Plex Sans', sans-serif !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "Hack The Plains 2026 Datasets"
 DATASETS = {
