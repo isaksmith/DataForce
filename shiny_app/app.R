@@ -79,7 +79,30 @@ server <- function(input, output, session) {
     } else if (label == "Digital Sessions") {
       p <- df %>% count(session_outcome) %>% ggplot(aes(session_outcome, n, fill = session_outcome)) + geom_col() + labs(x = "Outcome", y = "Count")
     } else if (label == "Error Codes") {
-      p <- df %>% ggplot(aes(error_code, fill = error_code)) + geom_bar() + labs(x = "Error code", y = "Count")
+      sessions_df <- load_dataset("Digital Sessions") %>%
+        mutate(error_code = ifelse(is.na(error_code), "NA", as.character(error_code)),
+               feature_used = ifelse(is.na(feature_used), "Unknown", as.character(feature_used)))
+
+      error_summary <- sessions_df %>%
+        count(error_code, feature_used, name = "feature_count") %>%
+        arrange(error_code, desc(feature_count)) %>%
+        group_by(error_code) %>%
+        slice(1) %>%
+        ungroup() %>%
+        rename(top_feature = feature_used) %>%
+        left_join(sessions_df %>% count(error_code, name = "session_count"), by = "error_code") %>%
+        inner_join(df, by = "error_code") %>%
+        arrange(desc(session_count)) %>%
+        slice_head(n = 10)
+
+      p <- error_summary %>%
+        ggplot(aes(x = session_count, y = reorder(error_code, session_count), size = session_count, color = top_feature,
+                   text = paste0("Error: ", error_code,
+                                 "<br>Description: ", description,
+                                 "<br>Sessions: ", session_count,
+                                 "<br>Top feature: ", top_feature))) +
+        geom_point(alpha = 0.8) +
+        labs(x = "Linked sessions", y = "Error code", color = "Top feature", size = "Session volume")
     } else if (label == "Feature Costs") {
       tidy <- tidyr::pivot_longer(df, cols = c(avg_cost_per_success_usd, avg_cost_per_failure_usd), names_to = "cost_type", values_to = "usd_cost")
       p <- tidy %>% ggplot(aes(feature_canonical, usd_cost, fill = cost_type)) + geom_col(position = "dodge") + labs(x = "Feature", y = "USD cost")
