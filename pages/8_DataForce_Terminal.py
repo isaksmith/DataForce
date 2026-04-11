@@ -9,32 +9,48 @@ st.set_page_config(page_title="MAGI Dashboard", layout="wide")
 
 branches = pd.read_csv("Hack The Plains 2026 Datasets/branches.csv")
 
-state_points = [
-  {"state": "KS", "lat": 39.0119, "lon": -98.4842, "cityCount": 0, "branchCount": 0, "cities": []},
-  {"state": "OK", "lat": 35.0078, "lon": -97.0929, "cityCount": 0, "branchCount": 0, "cities": []},
-  {"state": "NE", "lat": 41.4925, "lon": -99.9018, "cityCount": 0, "branchCount": 0, "cities": []},
-  {"state": "MO", "lat": 37.9643, "lon": -91.8318, "cityCount": 0, "branchCount": 0, "cities": []},
-]
+city_coordinates = {
+    ("KS", "Emporia"): (38.4040, -96.1817),
+    ("KS", "Derby"): (37.5458, -97.2689),
+    ("KS", "Hutchinson"): (38.0608, -97.9298),
+    ("KS", "KC Metro"): (39.0997, -94.5786),
+    ("KS", "Newton"): (38.0461, -97.3450),
+    ("KS", "Salina"): (38.8403, -97.6114),
+    ("KS", "Topeka"): (39.0473, -95.6752),
+    ("KS", "Omaha"): (41.2565, -95.9345),
+    ("KS", "Tulsa"): (36.1540, -95.9928),
+    ("KS", "Wichita"): (37.6872, -97.3301),
+    ("OK", "Newton"): (35.2226, -97.4395),
+    ("OK", "Salina"): (36.3084, -95.1533),
+    ("OK", "Derby"): (36.0229, -95.9683),
+    ("OK", "Topeka"): (35.4676, -97.5164),
+    ("NE", "Tulsa"): (41.1400, -96.2500),
+    ("NE", "Wichita"): (40.8136, -96.7026),
+    ("NE", "KC Metro"): (40.9264, -98.3420),
+    ("NE", "Salina"): (41.1117, -98.0026),
+    ("MO", "Tulsa"): (37.2089, -93.2923),
+}
 
-branch_summary = (
-  branches.groupby("branch_state")
-  .agg(branchCount=("branch_code", "count"), cityCount=("branch_city", "nunique"))
-  .reset_index()
-)
 city_summary = (
   branches.groupby(["branch_state", "branch_city"]) 
   .size()
   .reset_index(name="branches")
 )
 
-state_lookup = {item["state"]: item for item in state_points}
-for row in branch_summary.itertuples():
-  if row.branch_state in state_lookup:
-    state_lookup[row.branch_state]["branchCount"] = int(row.branchCount)
-    state_lookup[row.branch_state]["cityCount"] = int(row.cityCount)
-    state_lookup[row.branch_state]["cities"] = city_summary[city_summary["branch_state"] == row.branch_state][
-      ["branch_city", "branches"]
-    ].to_dict(orient="records")
+city_points = []
+for row in city_summary.itertuples():
+    coords = city_coordinates.get((row.branch_state, row.branch_city))
+    if coords is None:
+        continue
+    city_points.append(
+        {
+            "state": row.branch_state,
+            "city": row.branch_city,
+            "lat": coords[0],
+            "lon": coords[1],
+            "branchCount": int(row.branches),
+        }
+    )
 
 state_code_to_name = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
@@ -49,7 +65,12 @@ state_code_to_name = {
     "VA": "Virginia", "WA": "Washington", "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
 }
 
-choropleth_df = pd.DataFrame(state_points)
+choropleth_df = (
+  branches.groupby("branch_state")
+  .agg(branchCount=("branch_code", "count"))
+  .reset_index()
+  .rename(columns={"branch_state": "state"})
+)
 choropleth_df["state_name"] = choropleth_df["state"].map(state_code_to_name)
 
 us_geojson_url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/us-states.json"
@@ -76,20 +97,14 @@ folium.Choropleth(
     legend_name="Branch Data",
 ).add_to(terminal_map)
 
-for point in state_points:
-    city_lines = "<br>".join(f"{city['branch_city']}: {city['branches']}" for city in point["cities"]) or "No city data"
+for point in city_points:
     popup_html = f"""
     <div style='font-family: VT323, monospace; min-width: 220px;'>
-      <strong>{point['state']}</strong><br>
-      Branches: {point['branchCount']}<br>
-      Cities: {point['cityCount']}<br><br>
-      <strong>City Breakdown</strong><br>
-      {city_lines}
+      <strong>{point['city']}, {point['state']}</strong><br>
+      Branches: {point['branchCount']}
     </div>
     """
-    marker_radius = max(4, point["branchCount"] * 0.6)
-    if point["state"] == "KS":
-      marker_radius = max(4, point["branchCount"] * 0.38)
+    marker_radius = max(3, point["branchCount"] * 0.75)
 
     folium.CircleMarker(
         location=[point["lat"], point["lon"]],
@@ -99,7 +114,7 @@ for point in state_points:
         fill=True,
         fill_color="#22d3ee",
         fill_opacity=0.88,
-        tooltip=f"{point['state']} | Branches: {point['branchCount']}",
+        tooltip=f"{point['city']}, {point['state']} | Branches: {point['branchCount']}",
         popup=folium.Popup(popup_html, max_width=280),
     ).add_to(terminal_map)
 
