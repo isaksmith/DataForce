@@ -231,8 +231,8 @@ st.markdown(
       white-space: nowrap;
     }
     .ticker-track {
-      display: inline-block;
-      padding-left: 3%;
+      display: inline-flex;
+      width: max-content;
       animation: ticker-scroll 18s linear infinite;
     }
     .ticker-item {
@@ -244,7 +244,7 @@ st.markdown(
     }
     @keyframes ticker-scroll {
       0% { transform: translateX(0); }
-      100% { transform: translateX(-100%); }
+      100% { transform: translateX(-50%); }
     }
     </style>
     """,
@@ -255,6 +255,12 @@ st.markdown(
     """
     <div class="ticker-wrap">
       <div class="ticker-track">
+        <span class="ticker-item">LIVE TELEMETRY // TOTAL SESSIONS 2,000,000</span>
+        <span class="ticker-item">SESSION ALERT // FAILED TRANSACTIONS 4.8%</span>
+        <span class="ticker-item">ERROR FEED // ERR_AUTH 15K</span>
+        <span class="ticker-item">ERROR FEED // ERR_TIMEOUT 8K</span>
+        <span class="ticker-item">SUPPORT ALERT // LIVE TICKETS 65,000</span>
+        <span class="ticker-item">SYSTEM STATUS // INTERVENTION REQUIRED</span>
         <span class="ticker-item">LIVE TELEMETRY // TOTAL SESSIONS 2,000,000</span>
         <span class="ticker-item">SESSION ALERT // FAILED TRANSACTIONS 4.8%</span>
         <span class="ticker-item">ERROR FEED // ERR_AUTH 15K</span>

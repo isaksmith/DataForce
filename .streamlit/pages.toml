@@ -1,6 +1,6 @@
 [[pages]]
 path = "DataForce.py"
-name = "DataForce Summary"
+name = "Explorer"
 icon = ":material/home:"
 
 [[pages]]
@@ -26,10 +26,6 @@ name = "Feature Costs"
 [[pages]]
 path = "pages/6_Support_Interactions.py"
 name = "Support Interactions"
-
-[[pages]]
-path = "pages/7_Shiny_Explorer.py"
-name = "Shiny Explorer"
 
 [[pages]]
 path = "pages/8_DataForce_Terminal.py"
