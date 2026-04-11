@@ -17,6 +17,33 @@ def apply_global_font() -> None:
         button, input, textarea, select {
             font-family: 'IBM Plex Sans', sans-serif !important;
         }
+
+        [data-testid="stAppViewContainer"]::after {
+            content: "";
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 42px;
+            height: 42px;
+            margin-left: -21px;
+            margin-top: -21px;
+            border: 4px solid rgba(37, 99, 235, 0.16);
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: dataforce-spin 0.9s linear infinite;
+            z-index: 999998;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        [data-testid="stAppViewContainer"]:has(div[data-testid="stStatusWidget"])::after {
+            opacity: 1;
+        }
+
+        @keyframes dataforce-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
         </style>
         """,
         unsafe_allow_html=True,

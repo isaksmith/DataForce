@@ -290,8 +290,8 @@ st.markdown(
 st.markdown(
     """
     <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid #f59e0b; background:#000; padding:0.9rem 1rem; margin-bottom:1rem;">
-      <div style="font-size:1.8rem; font-weight:800; letter-spacing:0.22em; color:#fcd34d;">DATAFORCE TERMINAL</div>
-      <div style="font-size:0.9rem; color:#fde68a;">NATIONAL COMMAND VIEW</div>
+      <div style="font-size:1.8rem; font-weight:800; letter-spacing:0.22em; color:#fcd34d;">DASHBOARD</div>
+      <div style="font-size:1rem; color:#fde68a; font-family:'VT323', monospace; letter-spacing:0.12em;">NATIONAL INSIGHT VIEW</div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -304,7 +304,7 @@ with left:
     st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
     st.markdown("<div class='terminal-card'><div class='terminal-label'>ERROR TRACKING</div><div class='terminal-value'>ERR_AUTH: 15K</div><div class='terminal-value'>ERR_TIMEOUT: 8K</div><div class='terminal-value'>ERR_DEPOSIT: 5K</div></div>", unsafe_allow_html=True)
     st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='terminal-card'><div class='terminal-label'>COST PER FEATURE</div><div class='terminal-value'>MOBILE DEPOSIT: $0.76</div><div class='terminal-value'>WEB PORTAL: $0.44</div></div>", unsafe_allow_html=True)
+    st.markdown("<div class='terminal-card'><div class='terminal-label'>COST PER FEATURE</div><div class='terminal-value'>SUCCESSFUL TRANSACTION: $0.01</div><div class='terminal-value'>FAILED TRANSACTION: $12.00</div></div>", unsafe_allow_html=True)
 
 with center:
     st_folium(terminal_map, use_container_width=True, height=520)

@@ -6,20 +6,66 @@ from dataforce_utils import apply_global_font, add_download, load_csv, plot_valu
 
 apply_global_font()
 
+
+def canonicalize_channel(value: str) -> str:
+    raw = str(value).strip().lower()
+    if raw in {"web", "www", "browser"}:
+        return "Web"
+    if raw in {"mobile", "moble", "phone", "app"}:
+        return "Mobile"
+    if raw in {"unknown", "nan", "none", ""}:
+        return "Unknown"
+    return raw.title()
+
+
+def canonicalize_feature(value: str) -> str:
+    raw = str(value).strip().lower()
+    normalized = raw.replace("-", "_").replace("/", "_").replace(" ", "_")
+    mapping = {
+        "login": "Login",
+        "signin": "Login",
+        "sign_in": "Login",
+        "billpay": "Bill Pay",
+        "bill_pay": "Bill Pay",
+        "balancecheck": "Balance Check",
+        "balance_check": "Balance Check",
+        "bal_chk": "Balance Check",
+        "transfer": "Transfer",
+        "funds_transfer": "Transfer",
+        "xfer": "Transfer",
+        "mobile_deposit": "Mobile Deposit",
+        "mdeposit": "Mobile Deposit",
+        "mobiledeposit": "Mobile Deposit",
+        "statement_download": "Statement Download",
+        "stmt_dl": "Statement Download",
+        "statement": "Statement Download",
+        "open_acct": "New Account",
+        "new_account": "New Account",
+    }
+    if normalized in mapping:
+        return mapping[normalized]
+    if normalized in {"unknown", "nan", "none", ""}:
+        return "Unknown"
+    return raw.title()
+
+
 st.title("Digital Sessions")
 df = load_csv("digital_sessions.csv")
+df["channel_canonical"] = df["channel"].fillna("Unknown").map(canonicalize_channel)
+df["feature_used_canonical"] = df["feature_used"].fillna("Unknown").map(canonicalize_feature)
+df["session_outcome"] = df["session_outcome"].fillna("Unknown").astype(str)
 
-channel_filter = st.multiselect("Channel", sorted(df["channel"].dropna().astype(str).unique()))
+channel_filter = st.multiselect("Channel", sorted(df["channel_canonical"].dropna().astype(str).unique()))
 outcome_filter = st.multiselect("Session outcome", sorted(df["session_outcome"].dropna().astype(str).unique()))
-feature_filter = st.multiselect("Feature used", sorted(df["feature_used"].dropna().astype(str).unique())[:50])
+feature_filter = st.multiselect("Feature used", sorted(df["feature_used_canonical"].dropna().astype(str).unique())[:50])
 
 filtered = df.copy()
 if channel_filter:
-    filtered = filtered[filtered["channel"].astype(str).isin(channel_filter)]
+    filtered = filtered[filtered["channel_canonical"].astype(str).isin(channel_filter)]
 if outcome_filter:
     filtered = filtered[filtered["session_outcome"].astype(str).isin(outcome_filter)]
 if feature_filter:
-    filtered = filtered[filtered["feature_used"].astype(str).isin(feature_filter)]
+    filtered = filtered[filtered["feature_used_canonical"].astype(str).isin(feature_filter)]
 
 render_overview(filtered)
 add_download(filtered, "digital_sessions_filtered.csv")
@@ -27,13 +73,13 @@ render_preview(filtered)
 
 st.subheader("Visualizations")
 st.plotly_chart(plot_value_counts(filtered["session_outcome"], "Session outcomes"), use_container_width=True)
-st.plotly_chart(plot_value_counts(filtered["feature_used"], "Top features used", horizontal=True), use_container_width=True)
-st.plotly_chart(plot_value_counts(filtered["channel"], "Sessions by channel"), use_container_width=True)
+st.plotly_chart(plot_value_counts(filtered["feature_used_canonical"], "Top features used", horizontal=True), use_container_width=True)
+st.plotly_chart(plot_value_counts(filtered["channel_canonical"], "Sessions by channel"), use_container_width=True)
 
 st.subheader("Session flow Sankey")
 sankey_source = filtered.copy()
-sankey_source["channel"] = sankey_source["channel"].fillna("Unknown").astype(str)
-sankey_source["feature_used"] = sankey_source["feature_used"].fillna("Unknown").astype(str)
+sankey_source["channel"] = sankey_source["channel_canonical"].fillna("Unknown").astype(str)
+sankey_source["feature_used"] = sankey_source["feature_used_canonical"].fillna("Unknown").astype(str)
 sankey_source["session_outcome"] = sankey_source["session_outcome"].fillna("Unknown").astype(str)
 
 top_features_for_sankey = sankey_source["feature_used"].value_counts().head(8).index.tolist()
@@ -80,7 +126,11 @@ sankey_fig.update_layout(
     height=780,
     margin=dict(l=20, r=20, t=60, b=20),
 )
-st.plotly_chart(sankey_fig, use_container_width=True, height=780)
+st.plotly_chart(
+    sankey_fig,
+    use_container_width=True,
+    config={"responsive": True},
+)
 
 if "error_code" in filtered.columns:
     top_errors = filtered["error_code"].fillna("Unknown").astype(str).value_counts().head(15).reset_index()
