@@ -1,0 +1,11 @@
+error_code,description
+E001,Unknown error
+E002,Validation failed
+E003,Downstream service error
+E010,Image quality insufficient
+E020,Deposit limit exceeded
+E050,Session expired
+E099,Rate limit
+TIMEOUT,Request timed out
+AUTH_FAIL,Authentication failed
+NA,Not available

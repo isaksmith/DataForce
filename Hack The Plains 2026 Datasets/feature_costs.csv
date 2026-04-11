@@ -1,0 +1,12 @@
+feature_canonical,avg_cost_per_success_usd,avg_cost_per_failure_usd
+login,0.215,1.253
+balance_check,0.196,0.833
+transfer,0.143,0.511
+bill_pay,0.14,0.372
+mobile_deposit,0.197,0.76
+card_controls,0.204,0.122
+statement_download,0.073,0.465
+new_account,0.237,1.321
+loan_payment,0.187,1.272
+p2p_payment,0.07,0.462
+alerts_settings,0.149,1.222
