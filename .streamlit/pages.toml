@@ -34,6 +34,7 @@ name = "Support Interactions"
 [[pages]]
 path = "pages/Customer_Simulations.py"
 name = "Customer Simulations - In Progress"
+hidden = true
 
 [[pages]]
 path = "pages/About.py"
