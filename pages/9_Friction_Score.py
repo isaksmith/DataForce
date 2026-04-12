@@ -259,6 +259,10 @@ unresolved_proxy = max(int(support_72h * 0.21), 0)
 avoidable_cost = float(feature_df["avoidable_failure_cost"].sum())
 overall_failure_rate = float(failed_sessions / max(total_sessions, 1))
 fail_to_support = float(support_24h / max(failed_sessions, 1))
+fx_q = feature_df["failure_like_rate"].quantile(0.65)
+premium_q = feature_df["premium_mean"].quantile(0.65)
+feature_df = feature_df.copy()
+feature_df["priority_zone"] = (feature_df["failure_like_rate"] >= fx_q) & (feature_df["premium_mean"] >= premium_q)
 
 st.markdown("## Digital Friction")
 st.markdown("<div class='section-gap-sm'></div>", unsafe_allow_html=True)
@@ -296,9 +300,6 @@ with main_col:
     zoom_in = float(st.session_state.get("friction_zoom", 1.25))
 
     plot_df = feature_df.copy()
-    fx_q = feature_df["failure_like_rate"].quantile(0.65)
-    premium_q = feature_df["premium_mean"].quantile(0.65)
-    plot_df["priority_zone"] = (plot_df["failure_like_rate"] >= fx_q) & (plot_df["premium_mean"] >= premium_q)
     x_vals = (plot_df["failure_like_rate"] * 100).clip(lower=0)
     y_vals = plot_df["premium_mean"].clip(lower=0)
     x_low = float(x_vals.quantile(0.02))
@@ -407,7 +408,21 @@ with main_col:
 
 with side_col:
     st.markdown("<div class='section-title'>Top Priorities</div>", unsafe_allow_html=True)
-    top_priorities = feature_df.head(4).copy()
+    priority_mode = st.radio(
+        "Priority ranking",
+        ["In Priority Zone", "Overall Cost Impact"],
+        index=0,
+        label_visibility="collapsed",
+        key="priority_ranking_mode",
+    )
+    if priority_mode == "In Priority Zone":
+        priority_source = feature_df[feature_df["priority_zone"]].copy()
+        if priority_source.empty:
+            st.caption("No features currently meet priority-zone thresholds; showing overall cost impact instead.")
+            priority_source = feature_df.copy()
+    else:
+        priority_source = feature_df.copy()
+    top_priorities = priority_source.sort_values("avoidable_failure_cost", ascending=False).head(4).copy()
     top_priorities["sessions_p75"] = feature_df["sessions"].quantile(0.75)
     top_priorities["premium_p75"] = feature_df["premium_mean"].quantile(0.75)
     top_priorities["failure_p75"] = feature_df["failure_like_rate"].quantile(0.75)
@@ -438,15 +453,19 @@ with side_col:
         unsafe_allow_html=True,
     )
 
-top4 = feature_df.head(4)
+top4 = top_priorities.copy()
 priority_share = top4["avoidable_failure_cost"].sum() / max(avoidable_cost, 1e-9)
+if priority_mode == "In Priority Zone":
+    insight_prefix = f"{len(top4)} priority-zone features shown drive"
+else:
+    insight_prefix = f"Top {len(top4)} features by overall cost drive"
 st.markdown("<div class='section-gap-md'></div>", unsafe_allow_html=True)
 st.markdown(
     (
         "<div class='insight-bar'>"
         "<div class='insight-title'>Insight</div>"
         "<div class='insight-text'>"
-        f"{len(top4)} features in the priority zone drive <strong>{priority_share*100:.0f}%</strong> "
+        f"{insight_prefix} <strong>{priority_share*100:.0f}%</strong> "
         f"of avoidable failure cost. Addressing them could reduce support exposure by approximately "
         f"<strong>{fmt_money(top4['avoidable_failure_cost'].sum())}</strong>."
         "</div>"
