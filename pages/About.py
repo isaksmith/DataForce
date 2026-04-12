@@ -147,18 +147,20 @@ st.markdown(
 
 # ── Core Components ───────────────────────────────────────────────────────────
 st.markdown("### Core components")
-c1, c2, c3 = st.columns(3, gap="medium")
+c1, c2 = st.columns(2, gap="medium")
 
 with c1:
     st.markdown(
         """
         <div class="component-card">
-          <div class="icon">🧠</div>
           <h4>Friction Engine</h4>
           <p>
-            Scores every digital session in real time using error codes, session outcomes,
-            feature cost premiums, retry patterns, and support follow-up signals. Flags
-            high-risk sessions before the customer reaches "Contact Us."
+            The analytical backbone of DataForce. Every digital session is scored using a
+            composite of error codes, session outcomes, feature failure cost premiums, retry
+            patterns, and 24/72-hour support follow-up signals. The resulting friction score
+            drives the Feature Friction Matrix — a prioritization view that ranks which banking
+            features to fix first based on both failure rate and financial cost. Built in Python
+            using Pandas, with precomputed scores loaded via <code>friction_score_pipeline.py</code>.
           </p>
         </div>
         """,
@@ -169,28 +171,15 @@ with c2:
     st.markdown(
         """
         <div class="component-card">
-          <div class="icon">🛡️</div>
           <h4>Proactive Intervention Layer</h4>
           <p>
-            Contextual tooltips, dynamic micro-tutorials, and a "Save" chatbot intercept
-            triggered by friction score spikes — adapted to the customer's segment, digital
-            tenure, and the specific error they hit.
-          </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-with c3:
-    st.markdown(
-        """
-        <div class="component-card">
-          <div class="icon">🖥️</div>
-          <h4>Agent Omni-Dashboard</h4>
-          <p>
-            When a call still happens, agents open with full context: active session logs,
-            exact error code, recent product usage, and friction score — eliminating the
-            "How can I help you?" cold start and slashing average handling time.
+            When the Friction Engine detects a score spike, it triggers a targeted intervention
+            before the customer navigates to "Contact Us." Contextual tooltips surface the exact
+            reason for an error (e.g., "Image too blurry" instead of "Error 505"). Dynamic
+            micro-tutorials guide low-experience or newly enrolled customers through the failing
+            feature. A chatbot intercept offers instant resolution — turning a $12.00 support
+            call into a $0.01 digital fix. Intervention type and outcome are modeled directly
+            in the Customer Simulations page using Mesa agent-based simulation.
           </p>
         </div>
         """,
@@ -205,17 +194,64 @@ st.markdown(
     <div class="about-section">
       <h3>What's in this app</h3>
       <ul>
-        <li><strong>Home</strong> — National branch map and headline operational metrics</li>
-        <li><strong>Explorer</strong> — General-purpose browser for all six datasets</li>
-        <li><strong>Branches</strong> — Branch network distribution by state and city</li>
-        <li><strong>Customers</strong> — Customer demographics, segments, and tenure</li>
-        <li><strong>Digital Sessions</strong> — Session outcomes, feature usage, and Sankey flow</li>
-        <li><strong>Error Codes</strong> — Error impact by session volume and feature driver</li>
-        <li><strong>Feature Costs</strong> — Success vs. failure cost model per banking feature</li>
-        <li><strong>Support Interactions</strong> — Support volume, reason codes, and resolution mix</li>
-        <li><strong>Friction Score</strong> — Feature Friction Matrix and priority intervention targets</li>
-        <li><strong>Knowledge Graph</strong> — Interactive dataset relationship map</li>
-        <li><strong>Customer Simulations</strong> — Agent-based simulation of friction scenarios</li>
+        <li>
+          <strong>Home</strong> — National command-center view of the branch network on an
+          interactive choropleth map, with a scrolling telemetry ticker and headline metrics:
+          total sessions, failed transactions, top error codes, support ticket volume, and
+          total friction cost.
+        </li>
+        <li>
+          <strong>Explorer</strong> — General-purpose dataset browser. Select any of the six
+          source datasets, optionally filter by column value, and get a row/column summary,
+          a dataset-specific chart, and a scrollable data preview — mirroring the companion
+          R Shiny workflow.
+        </li>
+        <li>
+          <strong>Branches</strong> — Explores the bank's physical branch network. Filter by
+          state and city, view branch counts per state and city in bar charts, and download
+          filtered data.
+        </li>
+        <li>
+          <strong>Customers</strong> — Explores the customer base by segment and churn status.
+          Surfaces a segment breakdown, tenure distribution histogram, and top home branches.
+        </li>
+        <li>
+          <strong>Digital Sessions</strong> — Analyzes session behavior across channels and
+          features. Includes outcome, feature, and channel distributions plus a three-stage
+          Sankey diagram (Channel → Feature → Outcome) and a top error codes chart.
+        </li>
+        <li>
+          <strong>Error Codes</strong> — Cross-references the error code reference table with
+          session data to show which errors are most impactful, which features drive them, and
+          provides a searchable impact summary and treemap.
+        </li>
+        <li>
+          <strong>Feature Costs</strong> — Displays the financial cost model per banking feature:
+          average cost of a successful session vs. a failed one, and the failure cost premium
+          that drives friction score risk weighting.
+        </li>
+        <li>
+          <strong>Support Interactions</strong> — Analyzes support contact behavior: interaction
+          volume by type, top reason codes, and resolution mix. Support data feeds the friction
+          score pipeline's 24h and 72h follow-up flags.
+        </li>
+        <li>
+          <strong>Friction Score</strong> — The analytical core. Visualizes precomputed session
+          friction scores to identify which features cause the most customer pain and financial
+          cost. Features a KPI bar, Feature Friction Matrix scatter plot, ranked priority list,
+          and full feature breakdown table.
+        </li>
+        <li>
+          <strong>Knowledge Graph</strong> — Interactive force-directed graph showing how the
+          six datasets relate to each other: primary keys, foreign key links, field descriptions,
+          and downstream dependencies.
+        </li>
+        <li>
+          <strong>Customer Simulations</strong> — Agent-based simulation of customer behavior
+          during friction events. Configure feature, channel, error code, and intervention type,
+          then view outcome distributions, friction score spreads, and estimated support costs
+          across a sampled customer population.
+        </li>
       </ul>
     </div>
     """,
