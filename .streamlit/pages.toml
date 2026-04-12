@@ -32,11 +32,6 @@ path = "pages/6_Support_Interactions.py"
 name = "Support Interactions"
 
 [[pages]]
-path = "pages/Customer_Simulations.py"
-name = "Customer Simulations - In Progress"
-hidden = true
-
-[[pages]]
 path = "pages/About.py"
 name = "About"
 icon = ":material/info:"
