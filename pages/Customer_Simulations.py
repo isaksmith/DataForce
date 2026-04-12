@@ -329,15 +329,22 @@ if run_sim:
         st.error("No matching customer rows found in `customers.csv` for this segment.")
         st.stop()
 
-    results = run_mesa_simulation_from_sample(
-        num_agents=num_agents,
-        customers=population,
-        feature=feature,
-        channel=channel,
-        error_code=error_code,
-        intervention=intervention,
-        costs=costs,
-    )
+    try:
+        results = run_mesa_simulation_from_sample(
+            num_agents=num_agents,
+            customers=population,
+            feature=feature,
+            channel=channel,
+            error_code=error_code,
+            intervention=intervention,
+            costs=costs,
+        )
+    except RuntimeError as exc:
+        st.error(
+            "Simulation backend is unavailable in this deployment environment. "
+            f"Details: {exc}"
+        )
+        st.stop()
 
     if results.empty:
         st.warning("Simulation returned no results.")

@@ -1,6 +1,11 @@
 from pathlib import Path
 
-import mesa
+try:
+    import mesa
+    _MESA_AVAILABLE = True
+except Exception:
+    mesa = None
+    _MESA_AVAILABLE = False
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -193,63 +198,72 @@ def estimate_feature_cost(feature: str, costs: pd.DataFrame) -> tuple[float, flo
     return float(row["avg_cost_per_success_usd"].iloc[0]), float(row["avg_cost_per_failure_usd"].iloc[0])
 
 
-class CustomerAgent(mesa.Agent):
-    def __init__(self, model, segment: str, digital_tenure_days: int, feature: str, channel: str, error_code: str, churn_flag: int):
-        super().__init__(unique_id=f"agent-{id(self)}", model=model)
-        self.segment = segment
-        self.digital_tenure_days = digital_tenure_days
-        self.feature = feature
-        self.channel = channel
-        self.error_code = error_code
-        self.churn_flag = churn_flag
-        self.outcome = "Pending"
-        self.friction_score = 0
-        self.escalation_probability = 0.0
-        self.estimated_cost = 0.0
+if _MESA_AVAILABLE:
+    class CustomerAgent(mesa.Agent):
+        def __init__(self, model, segment: str, digital_tenure_days: int, feature: str, channel: str, error_code: str, churn_flag: int):
+            super().__init__(unique_id=f"agent-{id(self)}", model=model)
+            self.segment = segment
+            self.digital_tenure_days = digital_tenure_days
+            self.feature = feature
+            self.channel = channel
+            self.error_code = error_code
+            self.churn_flag = churn_flag
+            self.outcome = "Pending"
+            self.friction_score = 0
+            self.escalation_probability = 0.0
+            self.estimated_cost = 0.0
 
-    def step(self):
-        result = simulate_customer_journey(
-            segment=self.segment,
-            digital_tenure_days=self.digital_tenure_days,
-            feature=self.feature,
-            channel=self.channel,
-            error_code=self.error_code,
-            churn_flag=self.churn_flag,
-            intervention=self.model.intervention,
-        )
-        self.friction_score = result["friction_score"]
-        self.outcome = result["outcome"]
-        self.escalation_probability = result["escalation_probability"]
-        success_cost, failure_cost = estimate_feature_cost(self.feature, self.model.costs)
-        self.estimated_cost = {
-            "Escalated to Support": failure_cost,
-            "Resolved with Assistance": (failure_cost + success_cost) / 2,
-            "Resolved Digitally": success_cost,
-        }.get(self.outcome, failure_cost)
+        def step(self):
+            result = simulate_customer_journey(
+                segment=self.segment,
+                digital_tenure_days=self.digital_tenure_days,
+                feature=self.feature,
+                channel=self.channel,
+                error_code=self.error_code,
+                churn_flag=self.churn_flag,
+                intervention=self.model.intervention,
+            )
+            self.friction_score = result["friction_score"]
+            self.outcome = result["outcome"]
+            self.escalation_probability = result["escalation_probability"]
+            success_cost, failure_cost = estimate_feature_cost(self.feature, self.model.costs)
+            self.estimated_cost = {
+                "Escalated to Support": failure_cost,
+                "Resolved with Assistance": (failure_cost + success_cost) / 2,
+                "Resolved Digitally": success_cost,
+            }.get(self.outcome, failure_cost)
 
 
-class SupportSimulationModel(mesa.Model):
-    def __init__(self, num_agents: int, segment: str, digital_tenure_days: int, feature: str, channel: str, error_code: str, churn_flag: int, intervention: str, costs: pd.DataFrame):
-        super().__init__()
-        self.intervention = intervention
-        self.costs = costs
-        self.datacollector = mesa.DataCollector(
-            agent_reporters={
-                "Outcome": "outcome",
-                "FrictionScore": "friction_score",
-                "EscalationProbability": "escalation_probability",
-                "EstimatedCost": "estimated_cost",
-            }
-        )
-        for _ in range(num_agents):
-            CustomerAgent(self, segment, digital_tenure_days, feature, channel, error_code, churn_flag)
+    class SupportSimulationModel(mesa.Model):
+        def __init__(self, num_agents: int, segment: str, digital_tenure_days: int, feature: str, channel: str, error_code: str, churn_flag: int, intervention: str, costs: pd.DataFrame):
+            super().__init__()
+            self.intervention = intervention
+            self.costs = costs
+            self.datacollector = mesa.DataCollector(
+                agent_reporters={
+                    "Outcome": "outcome",
+                    "FrictionScore": "friction_score",
+                    "EscalationProbability": "escalation_probability",
+                    "EstimatedCost": "estimated_cost",
+                }
+            )
+            for _ in range(num_agents):
+                CustomerAgent(self, segment, digital_tenure_days, feature, channel, error_code, churn_flag)
 
-    def step(self):
-        self.agents.shuffle_do("step")
-        self.datacollector.collect(self)
+        def step(self):
+            self.agents.shuffle_do("step")
+            self.datacollector.collect(self)
+else:
+    class CustomerAgent:
+        pass
+
+    class SupportSimulationModel:
+        pass
 
 
 def run_mesa_simulation(num_agents: int, segment: str, digital_tenure_days: int, feature: str, channel: str, error_code: str, churn_flag: int, intervention: str, costs: pd.DataFrame) -> pd.DataFrame:
+    if not _MESA_AVAILABLE:
+        raise RuntimeError("Mesa dependency is not available in this environment.")
     model = SupportSimulationModel(
         num_agents=num_agents,
         segment=segment,
