@@ -366,10 +366,13 @@ with main_col:
         text="<b>Priority Zone</b><br><span style='font-size:11px'>High impact → Fix now</span>",
         showarrow=False,
         yshift=16,
-        align="left",
-        bgcolor="rgba(15,23,42,0.82)",
-        bordercolor="rgba(148,163,184,0.45)",
-        borderwidth=1,
+        align="center",
+        xanchor="center",
+        width=max((x_max - fx_q * 100) * 10, 220),
+        bgcolor="rgba(107,112,247,0.88)",
+        bordercolor="#6b70f7",
+        borderwidth=2,
+        font=dict(color="#f8fafc", family="JetBrains Mono, monospace", size=12),
     )
     if show_labels:
         for row in plot_df.head(6).itertuples():
