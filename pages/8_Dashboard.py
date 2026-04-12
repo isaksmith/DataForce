@@ -228,8 +228,9 @@ st.markdown(
         height: 100%;
     }
     .terminal-label {
-        font-size: 0.72rem;
-        letter-spacing: 0.18em;
+        font-size: 0.96rem;
+        letter-spacing: 0.11em;
+        line-height: 1.05;
         color: #fbbf24;
         margin-bottom: 0.8rem;
     }
@@ -332,4 +333,4 @@ with right:
     st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
     st.markdown("<div class='terminal-card'><div class='terminal-label'>SUPPORT SATURATION</div><div class='terminal-value'>LIVE TICKETS: 65,000</div><div class='terminal-value'>AGENT LOAD: 92%</div></div>", unsafe_allow_html=True)
     st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='terminal-card'><div class='terminal-label'>TARGET VETO</div><div style='border:1px solid #ef4444; background:#450a0a; color:#fca5a5; padding:1rem; text-align:center; font-size:1.4rem; font-weight:800;'>CHURN RISK DETECTED: HIGH</div></div>", unsafe_allow_html=True)
+    st.markdown("<div class='terminal-card'><div class='terminal-label'>AVG FRICTION SCORE</div><div style='border:1px solid #ef4444; background:#450a0a; color:#fca5a5; padding:0.9rem; text-align:center; font-size:2.3rem; line-height:1.0; font-weight:800;'>22.55</div></div>", unsafe_allow_html=True)
