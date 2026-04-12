@@ -36,3 +36,8 @@ path = "pages/Customer_Simulations.py"
 name = "Customer Simulations"
 hidden = true
 
+[[pages]]
+path = "pages/About.py"
+name = "About"
+icon = ":material/info:"
+
