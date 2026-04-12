@@ -1,0 +1,282 @@
+DataForce - Code Review and Hackathon Submission Summary
+========================================================
+
+Project
+-------
+DataForce is a unified digital friction intelligence platform built for Hack The Plains 2026.
+It analyzes end-to-end banking interaction data (sessions, errors, support, feature costs,
+customer profiles, branch context) to identify high-friction customer journeys and prioritize
+interventions that reduce support cost, improve resolution rates, and lower churn risk.
+
+Core objective:
+Move the organization from passive error logging to active, cost-aware intervention.
+
+Business framing:
+- Current support call estimated cost: $12.00
+- Digital/self-serve intervention target cost: $0.01
+- Product goal: detect friction early, guide recovery, and escalate only when needed
+
+
+Judging-Oriented Executive Summary
+----------------------------------
+This project demonstrates:
+1) Data integration across six source datasets with consistent normalization and profiling.
+2) A friction scoring methodology tied to both experience outcomes and financial impact.
+3) A clear prioritization framework (Feature Friction Matrix + ranked intervention targets).
+4) Explainable visual analytics across operational, customer, and support dimensions.
+5) An extensible simulation layer backed by generated customer personas.
+6) Production hardening work for Streamlit Cloud deployment stability.
+
+
+Data Assets and Coverage
+------------------------
+Primary datasets:
+- branches.csv
+- customers.csv (349,655 profiles)
+- digital_sessions.csv
+- error_codes.csv
+- feature_costs.csv
+- support_interactions.csv
+
+Generated artifacts:
+- session_friction_scores.csv (pipeline output)
+- customer_personas.json (full local artifact)
+- customer_personas_sample.json (5,000 stratified cloud-safe artifact)
+- simulation_seed_report.md and JSON exports for MiroFish integration
+
+
+Application Scope (Final Delivered Pages)
+------------------------------------------
+1) Home (DataForce.py)
+- National command-center view with branch choropleth map and telemetry cards.
+- High-level operational signal: failed transactions, support load, error pressure.
+- Terminal-inspired UI for pitch/demo readability.
+
+2) Explorer
+- Generic dataset browser for all source tables.
+- Inline filtering + row/column metrics + table preview + chart by dataset type.
+
+3) Branches
+- Geographic branch distribution analysis by state and city.
+
+4) Customers
+- Segment/churn/tenure exploration with demographic and branch context views.
+
+5) Digital Sessions
+- Session outcomes, channel and feature usage, top errors.
+- Sankey flow (Channel -> Feature -> Outcome) to reveal drop-off and failure paths.
+
+6) Error Codes
+- Error impact summary with session linkage, top feature attribution.
+- Treemap and bubble chart views for frequency and impact.
+- Label cleanup from NA to No Error for interpretability.
+
+7) Feature Costs
+- Success vs failure cost comparison per feature.
+- Directly powers friction cost premium weighting.
+
+8) Support Interactions
+- Interaction type, reason-code, and resolution mix.
+- Feeds 24h/72h support follow-up signals into friction scoring.
+
+R/Shiny visualization blueprints are included directly in:
+- Branches
+- Customers
+- Digital Sessions
+- Error Codes
+- Feature Costs
+- Support Interactions
+
+Blueprint intent:
+- Provide a direct Python-to-R implementation pathway for each core visualization page.
+- Enable teams with R-first analytics stacks to reproduce equivalent dashboards quickly.
+
+9) Friction Score
+- KPI panel + Feature Friction Matrix + priority ranking cards.
+- Quantile-based priority zone for intervention targeting.
+- Central decision-support page for product and operations.
+
+10) Knowledge Graph
+- Interactive schema and relationship view across core datasets.
+
+11) Customer Simulations - In Progress
+- Persona-driven simulation controls and visual outputs.
+- Persona generation references MiroFish OSS lineage:
+  https://github.com/666ghj/MiroFish
+- Cloud-safe fallback uses a representative 5,000-persona sample.
+
+12) About
+- Consolidated project narrative (vision, components, page map, datasets, stack).
+- Updated for judging clarity and explicit MiroFish backend reference.
+
+
+Technical Stack
+---------------
+Backend/App:
+- Python 3.9+
+- Streamlit 1.50
+
+Data/Analytics:
+- Pandas 2.2
+- PyArrow 16.1
+
+Visualization:
+- Plotly 5.24
+- Folium 0.18
+- streamlit-folium 0.23
+- streamlit-agraph 0.0.45
+
+Simulation:
+- Mesa 2.4.0 (now optional-safe at import time)
+
+Infra/runtime hardening:
+- Requests (GeoJSON fetch timeout + caching)
+
+R/Shiny track (visual analytics parity):
+- The app includes an explicit R/Shiny blueprint layer for page-level reproducibility.
+- Supported blueprint stack: shiny + dplyr + ggplot2 + DT (and plotly/lubridate where relevant).
+- Purpose: demonstrate cross-language portability for judging and enterprise handoff.
+
+
+Development Process Summary
+---------------------------
+Phase 1 - Product framing and UX foundation
+- Established DataForce narrative and terminal-style visual language.
+- Unified page structure and navigation behavior.
+- Added robust explorer and dashboard foundations for demo flow.
+
+Phase 2 - Analytics depth and friction model UX
+- Expanded friction score presentation with better annotation, ranking, and controls.
+- Improved page-level visual summaries and decision support.
+- Integrated knowledge graph and persona/simulation concepts into app flow.
+
+Phase 3 - MiroFish integration and simulation artifact pipeline
+- Built persona export pipeline from customer/session data.
+- Added customer simulation page with persona graph and scenario controls.
+- Added docs for each page and project narrative support.
+
+Phase 4 - Cloud deployment hardening and recovery
+- Resolved repeated Streamlit Cloud startup stalls/crashes.
+- Fixed map loading issues (remote GeoJSON latency and map caching behavior).
+- Isolated optional dependencies to prevent whole-app crash propagation.
+- Introduced cloud-safe persona artifact strategy (sample fallback).
+
+Phase 5 - Submission polishing
+- Added About page with full project context for judges.
+- Expanded page-level descriptions and MiroFish attribution.
+- Finalized sidebar order and in-progress labeling for simulation page.
+
+
+Commit History Highlights (Recent and Most Relevant)
+----------------------------------------------------
+Chronology below emphasizes project milestones and deployment fixes:
+
+- 866a081  Update terminal map and app styling
+- b8185fa  Refine terminal ticker and layout
+- 742cfa1  Tighten terminal map legend styling
+- 5c2cc65  Rename Shiny Explorer and refine terminal UI
+- 5325ad1  Update explorer and add knowledge graphs
+- a5e8018  Use city-level terminal map hotspots
+- 5b713e6  Finalize dashboard and explorer updates
+- bca3d0c  Add friction scoring dashboard improvements
+- 3752d66  Update friction score annotation styling
+- c2bb045  Add interactive persona and knowledge graph simulation updates
+- 9781012  Center graph control toggles
+- c7040a4  Remove missing-values metric and refresh README
+- 1a9704f  Add priority ranking mode for friction top features
+- 584e901  Increase dashboard card typography emphasis
+- ff703f8  Update Streamlit landing and explorer page layout
+- 45d7151  Update pages config and customer simulations page
+- dd8beb4  Hide Dashboard page from sidebar navigation
+- 743268a  Remove Dashboard page
+- 6dc4e0f  Remove Dashboard hidden entry from pages.toml
+- 3a6e1cb  Guard Customer Simulations page against cloud import failures; hide from nav; fix NA label; add docs
+- e354b5b  Cache GeoJSON fetch and map build to fix Streamlit Cloud stall
+- d9a5715  Fix map not rendering: remove cache_resource from map builder
+- 4962f0d  Add About page
+- d1dc077  Rewrite About page with expanded project summary
+- 812b421  Expand Customer Simulations description with MiroFish reference
+- cacdf0c  Update MiroFish link to original repo
+- 002786a  Rename Customer Simulations to In Progress; reorder About page
+- db412bb  Harden app startup: make Mesa optional and guard simulation execution
+- 388ef4c  Show Customer Simulations and keep About directly beneath it
+
+
+Deployment Issues Encountered and Resolutions
+---------------------------------------------
+Issue A - Streamlit Cloud stalling on startup
+Likely cause:
+- Blocking remote GeoJSON retrieval from GitHub at page render time.
+Resolution:
+- Added fetch timeout and cache layer for GeoJSON retrieval.
+- Removed unsafe caching of mutable Folium map object that broke rendering.
+
+Issue B - Full-app crash risk from optional simulation dependency
+Likely cause:
+- mesa import failure propagating through shared utility imports.
+Resolution:
+- Made Mesa import optional in shared utils.
+- Added runtime guard and user-facing error path in simulation execution.
+
+Issue C - Persona artifact missing in cloud
+Likely cause:
+- Full persona file too large for GitHub limits (>100MB).
+Resolution:
+- Added stratified 5,000-row sample artifact for cloud deployment.
+- Implemented full-file preferred, sample fallback behavior in simulation page.
+
+Issue D - Sidebar/nav clarity
+Resolution:
+- Explicit page ordering in pages.toml.
+- Added About page and adjusted placement under Customer Simulations.
+- Marked simulation page as in-progress in title.
+
+
+About Page Context (Integrated)
+-------------------------------
+Vision:
+- Failed/abandoned sessions create direct support cost, churn risk, and trust erosion.
+- DataForce detects friction early and routes users to the lowest-cost successful resolution.
+
+Core components (final state):
+1) Friction Engine
+- Composite score built from session outcomes, retries, error codes,
+  feature failure premiums, and support follow-up signals.
+
+2) Proactive Intervention Layer
+- Contextual guidance and targeted recovery paths based on customer profile
+  and friction context, modeled and stress-tested in simulation workflows.
+
+Reference integration:
+- Persona backend concept linked to MiroFish open-source framework.
+
+
+What Was Delivered for Judging
+------------------------------
+Analytical deliverables:
+- Unified data exploration across operational, customer, and support dimensions.
+- Friction scoring with cost-aware prioritization.
+- Feature-level prioritization artifacts for intervention planning.
+- Scenario simulation framework with persona-backed outputs.
+- Cross-platform visualization blueprinting (Python/Streamlit + R/Shiny equivalents).
+
+Engineering deliverables:
+- Multi-page Streamlit application with consistent UX/styling.
+- Deployment hardening for cloud runtime constraints.
+- Documentation set (page docs, summaries, and this code review file).
+- Reproducible commit trail showing iterative build and stabilization.
+
+Pitch-ready outcomes:
+- Clear demonstration of business impact path:
+  detect friction -> intervene earlier -> reduce support cost -> improve retention.
+- Evidence-backed prioritization of high-cost/high-failure feature journeys.
+- Working prototype that balances analytics depth, UX clarity, and operational realism.
+
+
+Submission Notes
+----------------
+- Customer Simulations is intentionally labeled "In Progress" to signal scope honesty.
+- Simulation page now fails gracefully when optional dependencies are unavailable.
+- Cloud deployment uses representative persona sampling to stay within repository limits.
+
+End of review.
