@@ -2,12 +2,25 @@ from pathlib import Path
 import json
 import subprocess
 
-import pandas as pd
-import plotly.express as px
 import streamlit as st
-from streamlit_agraph import Config as AGraphConfig, Edge, Node, agraph
 
-from dataforce_utils import apply_global_font, load_simulation_frames, run_mesa_simulation_from_sample
+try:
+    import pandas as pd
+    import plotly.express as px
+    from streamlit_agraph import Config as AGraphConfig, Edge, Node, agraph
+    from dataforce_utils import apply_global_font, load_simulation_frames, run_mesa_simulation_from_sample
+    _DEPS_OK = True
+except Exception as _import_err:
+    _DEPS_OK = False
+    _import_err_msg = str(_import_err)
+
+if not _DEPS_OK:
+    st.title("Customer Simulation")
+    st.warning(
+        "This page is unavailable in the current environment because one or more "
+        f"dependencies could not be loaded: `{_import_err_msg}`"
+    )
+    st.stop()
 
 apply_global_font()
 REPO_DIR = Path(__file__).resolve().parents[1]

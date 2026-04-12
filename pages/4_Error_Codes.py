@@ -17,7 +17,7 @@ if search:
     filtered = filtered[mask.any(axis=1)]
 
 session_errors = sessions.copy()
-session_errors["error_code"] = session_errors["error_code"].fillna("NA").astype(str)
+session_errors["error_code"] = session_errors["error_code"].fillna("No Error").astype(str)
 session_errors["feature_used"] = session_errors["feature_used"].fillna("Unknown").astype(str)
 
 usage = (
@@ -74,6 +74,7 @@ feature_breakdown = (
     .sort_values("count", ascending=False)
     .head(20)
 )
+feature_breakdown["error_code"] = feature_breakdown["error_code"].replace("NA", "No Error")
 fig2 = px.treemap(
     feature_breakdown,
     path=["feature_used", "error_code"],

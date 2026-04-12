@@ -1,0 +1,316 @@
+DataForce — Page Summaries
+==========================
+Application tech stack: Python 3.9+, Streamlit 1.50, Pandas 2.2, Plotly 5.24, Folium 0.18,
+streamlit-folium 0.23, streamlit-agraph 0.0.45, Mesa 2.4.0, PyArrow 16.1.
+Global font: IBM Plex Sans (Google Fonts, injected via dataforce_utils.apply_global_font).
+All CSV data is loaded from "Hack The Plains 2026 Datasets/" via dataforce_utils.load_csv,
+which wraps pd.read_csv with a consistent base-directory lookup.
+
+
+Home (DataForce.py)
+-------------------
+PURPOSE
+  The landing page and primary entry point. Presents a national command-center view of the
+  bank's branch network alongside headline operational metrics. Designed to give stakeholders
+  an immediate, high-level read on system health and friction cost.
+
+FUNCTION
+  - Reads branches.csv and groups it by (branch_state, branch_city) to compute branch counts.
+  - Maps each city to hardcoded lat/lon coordinates and builds a Folium choropleth of the US
+    colored by branch density per state, with circle markers for each city.
+  - Renders a scrolling ticker bar with static headline stats (sessions, errors, support load).
+  - Displays a three-column layout: left panel (telemetry, errors, costs), center (map +
+    summary grid + friction cost alert), right panel (demographics, support saturation, avg
+    friction score).
+  - Most headline figures are static display values for the hackathon demo; only the map is
+    driven by live CSV data.
+
+TECH STACK
+  - folium + streamlit-folium: interactive choropleth map with CartoDB dark_matter tiles,
+    YlOrBr fill color scale, and CircleMarker city pins.
+  - pandas: branch aggregation (groupby state/city, size).
+  - Streamlit: st.columns layout, st.markdown with unsafe_allow_html for terminal styling.
+  - Custom CSS: VT323 monospace font (Google Fonts), animated ticker, terminal card components.
+  - No sidebar controls; no user filters.
+
+
+Explorer (pages/0_Explorer.py)
+-------------------------------
+PURPOSE
+  A general-purpose dataset browser that lets any user inspect, filter, and chart any of the
+  six core DataForce datasets without writing code. Mirrors the workflow of the companion R
+  Shiny app.
+
+FUNCTION
+  - Presents a dropdown of all six datasets (Branches, Customers, Digital Sessions, Error
+    Codes, Feature Costs, Support Interactions).
+  - Loads the selected dataset via dataforce_utils.load_csv and displays row/column counts.
+  - Offers an optional column filter: user picks a column, then multiselects up to 100 unique
+    values to narrow the data.
+  - Renders a dataset-specific Plotly chart (bar, horizontal bar, bubble scatter, or grouped
+    bar depending on the dataset).
+  - Shows a scrollable preview of the first 500 filtered rows via st.dataframe.
+  - For Error Codes, joins digital_sessions.csv to compute session counts and top features
+    per error code before charting.
+
+TECH STACK
+  - plotly.express: px.bar, px.scatter (bubble mode) for all charts.
+  - pandas: groupby aggregations, merge for error code session join.
+  - dataforce_utils: load_csv, DATASETS registry, canonicalize_channel, canonicalize_feature.
+  - Streamlit: st.selectbox, st.multiselect, st.metric, st.plotly_chart, st.dataframe.
+  - No sidebar; all controls are inline on the page.
+
+
+Branches (pages/1_Branches.py)
+--------------------------------
+PURPOSE
+  Focused exploration of the bank's physical branch network. Lets users filter by geography,
+  understand branch distribution, and download filtered data.
+
+FUNCTION
+  - Loads branches.csv and exposes state and city multiselect filters.
+  - Applies filters to the DataFrame and passes the result to shared utility functions.
+  - render_overview: shows row count, column count, and a .describe() summary.
+  - add_download: renders a CSV download button for the filtered data.
+  - render_preview: shows the first N rows in an st.dataframe.
+  - plot_value_counts: generates a Plotly bar chart of branch count by state and a horizontal
+    bar chart of top branch cities.
+  - render_r_blurb: displays the equivalent R/dplyr/ggplot2 code for reproducing the analysis.
+
+TECH STACK
+  - plotly.express (via dataforce_utils.plot_value_counts): px.bar, horizontal bar.
+  - pandas: filtering, value_counts.
+  - dataforce_utils: apply_global_font, add_download, load_csv, plot_value_counts,
+    render_overview, render_preview, render_r_blurb.
+  - Streamlit: st.multiselect, st.subheader, st.plotly_chart, st.download_button.
+
+
+Customers (pages/2_Customers.py)
+---------------------------------
+PURPOSE
+  Explores the customer base by segment and churn status. Surfaces demographic patterns,
+  tenure distribution, and branch affinity to support customer understanding.
+
+FUNCTION
+  - Loads customers.csv and exposes segment and churn_flag multiselect filters.
+  - Applies filters and calls shared render_overview, add_download, render_preview utilities.
+  - Plots customer count by segment (bar chart via plot_value_counts).
+  - Plots a tenure histogram using pd.to_numeric on tenure_months (40 bins).
+  - Plots top home branches (horizontal bar via plot_value_counts).
+  - render_r_blurb shows equivalent R code.
+
+TECH STACK
+  - plotly.express: px.histogram for tenure distribution; px.bar via plot_value_counts.
+  - pandas: pd.to_numeric for tenure coercion, filtering, value_counts.
+  - dataforce_utils: apply_global_font, add_download, load_csv, plot_value_counts,
+    render_overview, render_preview, render_r_blurb.
+  - Streamlit: st.multiselect, st.plotly_chart, st.dataframe, st.download_button.
+
+
+Digital Sessions (pages/3_Digital_Sessions.py)
+------------------------------------------------
+PURPOSE
+  Deep-dives into digital banking session behavior. Shows how customers move through channels
+  and features, where sessions fail, and which errors are most common. The Sankey diagram is
+  the centerpiece — it makes the full session journey visible at a glance.
+
+FUNCTION
+  - Loads digital_sessions.csv and applies canonicalize_channel and canonicalize_feature
+    (from dataforce_utils) to normalize messy raw values into clean labels.
+  - Exposes channel, session outcome, and feature multiselect filters.
+  - Renders bar charts for outcome distribution, top features, and channel breakdown.
+  - Builds a three-stage Sankey diagram (Channel → Feature → Outcome):
+      * Groups top 8 features by volume; remainder bucketed as "Other features".
+      * Constructs node/edge lists for channel-to-feature and feature-to-outcome flows.
+      * Renders with plotly.graph_objects.Sankey at 780px height.
+  - Renders a horizontal bar chart of the top 15 error codes from the filtered sessions.
+  - render_r_blurb shows equivalent R code.
+
+TECH STACK
+  - plotly.express: px.bar for distribution charts.
+  - plotly.graph_objects: go.Figure + go.Sankey for the flow diagram.
+  - pandas: groupby, value_counts, fillna, itertuples for Sankey edge construction.
+  - dataforce_utils: canonicalize_channel, canonicalize_feature, apply_global_font,
+    add_download, load_csv, plot_value_counts, render_overview, render_preview, render_r_blurb.
+  - Streamlit: st.multiselect, st.plotly_chart (with config={"responsive": True}), st.dataframe.
+
+
+Error Codes (pages/4_Error_Codes.py)
+--------------------------------------
+PURPOSE
+  Cross-references the error code reference table with actual session data to show which errors
+  are most impactful, which features drive them, and provides a searchable reference for
+  engineers and analysts.
+
+FUNCTION
+  - Loads error_codes.csv (reference table) and digital_sessions.csv (session data).
+  - Free-text search filters across all columns using DataFrame.astype(str).apply(str.contains).
+  - Joins session data to compute session_count per error code and top_feature per error code
+    (most common feature associated with each error, via groupby + drop_duplicates).
+  - Merges enriched data back into the filtered error code table.
+  - Renders a sortable impact summary table (error code, description, session count, top feature).
+  - Bubble scatter chart: x = session count, y = error code, size = volume, color = top feature.
+    Marker size scaled via sizeref = max_count / 60.
+  - Treemap: feature → error code hierarchy for the top 20 feature/error combinations.
+  - Detailed reference preview via render_preview.
+
+TECH STACK
+  - plotly.express: px.scatter (bubble mode), px.treemap.
+  - pandas: groupby, merge, drop_duplicates, fillna, sort_values.
+  - dataforce_utils: apply_global_font, add_download, load_csv, render_overview,
+    render_preview, render_r_blurb.
+  - Streamlit: st.text_input, st.dataframe, st.plotly_chart, st.subheader.
+
+
+Feature Costs (pages/5_Feature_Costs.py)
+-----------------------------------------
+PURPOSE
+  Displays the financial cost model for each banking feature. Compares the cost of a successful
+  session against a failed one, and surfaces the failure cost premium — the key risk weight used
+  throughout the friction score pipeline.
+
+FUNCTION
+  - Loads feature_costs.csv and exposes a feature multiselect filter.
+  - Calls render_overview, add_download, render_preview for standard data exploration.
+  - Melts the DataFrame from wide to long format (id_vars=feature_canonical, var_name=cost_type,
+    value_name=usd_cost) to enable a grouped bar chart comparing cost types side by side.
+  - render_r_blurb shows equivalent R code.
+
+TECH STACK
+  - plotly.express: px.bar with barmode="group" on the melted DataFrame.
+  - pandas: DataFrame.melt for wide-to-long reshaping, filtering.
+  - dataforce_utils: apply_global_font, add_download, load_csv, render_overview,
+    render_preview, render_r_blurb.
+  - Streamlit: st.multiselect, st.plotly_chart, st.dataframe, st.download_button.
+
+
+Support Interactions (pages/6_Support_Interactions.py)
+-------------------------------------------------------
+PURPOSE
+  Analyzes customer support contact behavior — how customers reach out after digital friction,
+  what reasons drive volume, and how well interactions are resolved. Support data is also a
+  key input to the friction score pipeline's follow-up flags.
+
+FUNCTION
+  - Loads support_interactions.csv and exposes interaction_type and resolution_status
+    multiselect filters.
+  - Calls render_overview, add_download, render_preview for standard exploration.
+  - Bar chart of interaction count by type (call, chat, email, branch visit).
+  - Horizontal bar chart of top reason codes by frequency.
+  - Pie chart of resolution status mix (resolved, unresolved, escalated).
+  - render_r_blurb shows equivalent R code.
+
+TECH STACK
+  - plotly.express: px.bar (via plot_value_counts), px.pie for resolution mix.
+  - pandas: groupby, value_counts, fillna, filtering.
+  - dataforce_utils: apply_global_font, add_download, load_csv, plot_value_counts,
+    render_overview, render_preview, render_r_blurb.
+  - Streamlit: st.multiselect, st.plotly_chart, st.dataframe, st.download_button.
+
+
+Friction Score (pages/9_Friction_Score.py)
+-------------------------------------------
+PURPOSE
+  The analytical core of DataForce. Surfaces which banking features cause the most customer
+  pain and financial cost by visualizing precomputed session friction scores. Designed to drive
+  prioritization decisions — which features to fix first and why.
+
+FUNCTION
+  - Loads precomputed session_friction_scores.csv (generated by friction_score_pipeline.py)
+    via a cached load function that searches four candidate paths.
+  - Sidebar controls: date window (last 30/90 days or all data, relative to max session_ts)
+    and channel multiselect filter.
+  - Computes per-feature aggregates via build_feature_view: sessions, failure rate, abandon
+    rate, friction mean, cost premium mean, support follow-up rates, and avoidable failure cost
+    (sessions × failure_like_rate × premium_mean).
+  - KPI bar: avoidable cost (fmt_money), overall failure rate, session count (fmt_count),
+    fail-to-support rate.
+  - Feature Friction Matrix scatter plot (px.scatter): x = failure+abandon rate, y = cost
+    premium, size = avoidable cost, color = priority zone flag. Axis ranges computed from
+    per-column quantiles with zoom control via st.session_state.
+  - Priority zone: features where failure_like_rate ≥ 65th pct AND premium_mean ≥ 65th pct.
+  - Side panel: ranked priority list with HTML badge tags (High volume, High cost, High
+    friction, Support-heavy) and an auto-generated insight bar for the top feature.
+  - Feature breakdown table with all metrics; CSV download via add_download.
+
+TECH STACK
+  - plotly.express: px.scatter for the Feature Friction Matrix.
+  - pandas: groupby + agg for feature rollup, quantile for priority thresholds, Timedelta
+    for date windowing, @st.cache_data for score loading.
+  - dataforce_utils: apply_global_font, add_download.
+  - Streamlit: st.sidebar, st.columns, st.markdown (custom CSS cards/tags), st.checkbox,
+    st.plotly_chart, st.dataframe, st.session_state for zoom.
+  - Custom CSS: friction-card, kpi-value/label, top-priority-item, tag color classes,
+    insight-bar, funnel-wrap — all injected via st.markdown unsafe_allow_html.
+
+
+Knowledge Graph (pages/9_Knowledge_Graph.py)
+---------------------------------------------
+PURPOSE
+  Provides an interactive visual map of the relationships between DataForce datasets. Helps
+  users understand primary keys, foreign key links, field descriptions, and downstream
+  dependencies before exploring or joining data.
+
+FUNCTION
+  - Defines a static graph spec for each dataset as a dict of nodes and links.
+  - Each node has an id, label, group (dataset / key / field / related), and details tooltip.
+  - render_interactive_graph converts the spec into streamlit-agraph Node and Edge objects,
+    applying a color map by group and sizing nodes by importance (dataset=36, key=28, field=24).
+  - AGraphConfig sets physics=True (force-directed layout), directed=True, nodeSpacing=220,
+    springLength=240, springConstant=0.02, damping=0.35 for a stable but interactive layout.
+  - format_graph_label converts snake_case labels to Title Case for display.
+  - A tab or section is rendered per dataset, each with its own graph.
+
+TECH STACK
+  - streamlit-agraph: Node, Edge, agraph, Config — force-directed graph rendering via vis.js.
+  - dataforce_utils: apply_global_font.
+  - Streamlit: st.title, st.caption, st.tabs (or sections per dataset).
+  - No data loading from CSVs; graph structure is fully hardcoded from schema knowledge.
+
+
+Customer Simulations (pages/Customer_Simulations.py)
+-----------------------------------------------------
+PURPOSE
+  Runs agent-based simulations of customer behavior during digital banking friction events.
+  Lets analysts test how different customer types respond to specific errors and interventions,
+  and estimate the resulting friction scores and support costs — without needing real session
+  data for the scenario being tested.
+
+FUNCTION
+  - Loads artifacts/customer_personas.json (generated by mirofish_export_pipeline.py) into a
+    DataFrame via a cached load function. Shows artifact status (size, last modified) and a
+    "Regenerate personas" button that calls mirofish_export_pipeline.py --customers-only via
+    subprocess.run.
+  - Simulation controls: persona segment, feature, channel, error code, intervention type,
+    and number of agents (25–500).
+  - Persona Knowledge Graph: build_persona_graph constructs a node/edge spec from the loaded
+    personas (segment, experience level, channel, support tendency, trust), then renders it
+    via streamlit-agraph with value-level breakdown nodes per attribute.
+  - Persona mix charts: px.histogram for experience distribution and support tendency vs. trust.
+  - On "Run simulation": calls run_mesa_simulation_from_sample (dataforce_utils), which:
+      * Samples num_agents rows from customers.csv (filtered by segment if selected).
+      * Instantiates a SupportSimulationModel (Mesa Model subclass) with one CustomerAgent
+        per sampled row.
+      * Each CustomerAgent.step() calls simulate_customer_journey to compute friction_score,
+        outcome, and escalation_probability based on segment, digital_tenure_days, feature,
+        channel, error_code, churn_flag, and intervention.
+      * estimate_feature_cost looks up avg_cost_per_success_usd and avg_cost_per_failure_usd
+        from feature_costs.csv to assign estimated_cost per agent.
+      * Mesa DataCollector gathers per-agent results after one model step.
+  - Results: KPI metrics (avg friction, avg escalation probability, avg cost), outcome bar
+    chart, friction box plot by segment/outcome, cost histogram, persona table, raw results
+    table, and CSV download buttons for both personas and results.
+
+TECH STACK
+  - Mesa 2.4.0: SupportSimulationModel (mesa.Model), CustomerAgent (mesa.Agent),
+    mesa.DataCollector for per-agent result collection. Agents use shuffle_do for randomized
+    step order.
+  - plotly.express: px.bar (outcomes), px.box (friction by segment), px.histogram (cost
+    distribution), px.histogram (persona mix charts).
+  - streamlit-agraph: Node, Edge, agraph, Config for the persona knowledge graph.
+  - pandas: DataFrame sampling, groupby aggregation, JSON loading.
+  - subprocess: runs mirofish_export_pipeline.py --customers-only for persona regeneration.
+  - dataforce_utils: apply_global_font, load_simulation_frames, run_mesa_simulation_from_sample,
+    simulate_customer_journey, estimate_feature_cost, CustomerAgent, SupportSimulationModel.
+  - Streamlit: st.columns, st.selectbox, st.slider, st.button, st.metric, st.plotly_chart,
+    st.dataframe, st.download_button, st.cache_data, st.spinner, st.rerun.
