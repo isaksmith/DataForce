@@ -288,9 +288,11 @@ k4.markdown(
 st.markdown("<div class='section-gap-sm'></div>", unsafe_allow_html=True)
 main_col, side_col = st.columns([2.6, 1.1], gap="large")
 with main_col:
-    c_a, c_b = st.columns(2, gap="large")
-    show_labels = c_a.checkbox("Show point labels", value=False)
-    show_legend = c_b.checkbox("Show legend", value=False)
+    controls_left, controls_mid, controls_right = st.columns([1.3, 2.2, 1.3], gap="small")
+    with controls_mid:
+        c_a, c_b = st.columns(2, gap="small")
+        show_labels = c_a.checkbox("Show point labels", value=False)
+        show_legend = c_b.checkbox("Show legend", value=False)
     zoom_in = float(st.session_state.get("friction_zoom", 1.25))
 
     plot_df = feature_df.copy()
