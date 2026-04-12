@@ -218,9 +218,6 @@ except FileNotFoundError:
     )
     st.stop()
 
-st.markdown("### Persona Knowledge Graph")
-render_persona_graph(personas)
-
 segment_options = sorted(personas["segment"].dropna().astype(str).unique().tolist())
 feature_options = sorted(costs["feature_canonical"].dropna().astype(str).str.replace("_", " ").str.title().unique().tolist())
 channel_options = ["Mobile", "Web"]
@@ -271,6 +268,9 @@ else:
 if segment_personas.empty:
     st.warning("No personas match the selected segment.")
     st.stop()
+
+st.markdown("### Persona Knowledge Graph")
+render_persona_graph(segment_personas)
 
 st.markdown("### Persona mix")
 col1, col2 = st.columns(2)

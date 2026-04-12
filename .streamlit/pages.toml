@@ -32,9 +32,5 @@ path = "pages/6_Support_Interactions.py"
 name = "Support Interactions"
 
 [[pages]]
-path = "pages/8_Dashboard.py"
-name = "Dashboard"
-
-[[pages]]
 path = "pages/Customer_Simulations.py"
 name = "Customer Simulations"
