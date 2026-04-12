@@ -8,7 +8,7 @@ try:
     import pandas as pd
     import plotly.express as px
     from streamlit_agraph import Config as AGraphConfig, Edge, Node, agraph
-    from dataforce_utils import apply_global_font, load_simulation_frames, run_mesa_simulation_from_sample
+    from dataforce_utils import apply_global_font, load_csv, run_mesa_simulation_from_sample
     _DEPS_OK = True
 except Exception as _import_err:
     _DEPS_OK = False
@@ -101,6 +101,23 @@ def persona_file_status() -> dict:
 def format_graph_label(value: str) -> str:
     """Convert snake_case graph labels into readable title text."""
     return str(value).replace("_", " ").strip().title()
+
+
+@st.cache_data(show_spinner=False)
+def load_simulation_inputs() -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Load only the data needed for this page to keep memory use cloud-friendly."""
+    customers = load_csv("customers.csv").copy()
+    costs = load_csv("feature_costs.csv").copy()
+
+    customers["tenure_months"] = pd.to_numeric(customers.get("tenure_months"), errors="coerce")
+    customers["churn_flag"] = pd.to_numeric(customers.get("churn_flag"), errors="coerce").fillna(0).astype(int)
+
+    enroll_col = "digital_enroll_date" if "digital_enroll_date" in customers.columns else "digital_enroll_ts"
+    customers[enroll_col] = pd.to_datetime(customers.get(enroll_col), errors="coerce")
+    customers["digital_tenure_days"] = (pd.Timestamp("today").normalize() - customers[enroll_col]).dt.days
+    customers["digital_tenure_days"] = customers["digital_tenure_days"].fillna(0).clip(lower=0)
+
+    return customers, costs
 
 
 @st.cache_data(show_spinner=False)
@@ -222,9 +239,7 @@ def render_persona_graph(personas_df: pd.DataFrame) -> None:
             st.markdown(f"- `{source}` **{label}** `{target}`")
 
 
-frames = load_simulation_frames()
-customers = frames["customers"].copy()
-costs = frames["costs"].copy()
+customers, costs = load_simulation_inputs()
 
 try:
     personas = load_personas()
