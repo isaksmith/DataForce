@@ -25,7 +25,10 @@ if not _DEPS_OK:
 apply_global_font()
 REPO_DIR = Path(__file__).resolve().parents[1]
 ARTIFACTS_DIR = REPO_DIR / "artifacts"
-PERSONA_PATH = ARTIFACTS_DIR / "customer_personas.json"
+# Prefer full file; fall back to committed sample for cloud deployments
+_FULL_PATH = ARTIFACTS_DIR / "customer_personas.json"
+_SAMPLE_PATH = ARTIFACTS_DIR / "customer_personas_sample.json"
+PERSONA_PATH = _FULL_PATH if _FULL_PATH.exists() else _SAMPLE_PATH
 
 st.title("Customer Simulation")
 
@@ -227,9 +230,18 @@ try:
     personas = load_personas()
 except FileNotFoundError:
     st.error(
-        "`artifacts/customer_personas.json` was not found. Generate it first with `python3 -u mirofish_export_pipeline.py --customers-only`."
+        "No persona artifact found. Expected `artifacts/customer_personas.json` or "
+        "`artifacts/customer_personas_sample.json`. Generate one with: "
+        "`python3 -u mirofish_export_pipeline.py --customers-only`."
     )
     st.stop()
+
+if PERSONA_PATH == _SAMPLE_PATH:
+    st.info(
+        "Running on a representative **5,000-persona sample** (stratified by segment). "
+        "For the full dataset, generate `artifacts/customer_personas.json` locally.",
+        icon="ℹ️",
+    )
 
 segment_options = sorted(personas["segment"].dropna().astype(str).unique().tolist())
 feature_options = sorted(costs["feature_canonical"].dropna().astype(str).str.replace("_", " ").str.title().unique().tolist())
