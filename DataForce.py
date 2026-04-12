@@ -86,7 +86,6 @@ def fetch_us_geojson() -> dict | str:
         return US_GEOJSON_URL
 
 
-@st.cache_resource(show_spinner=False)
 def build_terminal_map(_choropleth_df: pd.DataFrame, _city_points: list) -> folium.Map:
     """Build and cache the Folium map so it isn't rebuilt on every rerun."""
     geojson = fetch_us_geojson()
