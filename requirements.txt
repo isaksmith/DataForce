@@ -6,3 +6,4 @@ folium>=0.18
 streamlit-folium>=0.23
 mesa==2.4.0
 streamlit-agraph>=0.0.45
+requests>=2.31

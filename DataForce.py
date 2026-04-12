@@ -1,3 +1,4 @@
+import requests
 import folium
 import pandas as pd
 import streamlit as st
@@ -71,51 +72,62 @@ choropleth_df = (
 )
 choropleth_df["state_name"] = choropleth_df["state"].map(state_code_to_name)
 
-us_geojson_url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/us-states.json"
+US_GEOJSON_URL = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/us-states.json"
 
-terminal_map = folium.Map(location=[39.8, -98.6], zoom_start=4, tiles=None, control_scale=False)
 
-folium.TileLayer(
-    tiles="CartoDB dark_matter",
-    name="Terminal Base",
-    control=False,
-).add_to(terminal_map)
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_us_geojson() -> dict | str:
+    """Fetch and cache the US states GeoJSON. Falls back to URL string on error."""
+    try:
+        resp = requests.get(US_GEOJSON_URL, timeout=8)
+        resp.raise_for_status()
+        return resp.json()
+    except Exception:
+        return US_GEOJSON_URL
 
-folium.Choropleth(
-    geo_data=us_geojson_url,
-    name="choropleth",
-    data=choropleth_df,
-    columns=["state_name", "branchCount"],
-    key_on="feature.id",
-    fill_color="YlOrBr",
-    fill_opacity=0.82,
-    line_opacity=0.45,
-    line_color="#fbbf24",
-    line_weight=1.8,
-    legend_name="Branch Data",
-).add_to(terminal_map)
 
-for point in city_points:
-    popup_html = f"""
+@st.cache_resource(show_spinner=False)
+def build_terminal_map(_choropleth_df: pd.DataFrame, _city_points: list) -> folium.Map:
+    """Build and cache the Folium map so it isn't rebuilt on every rerun."""
+    geojson = fetch_us_geojson()
+    m = folium.Map(location=[39.8, -98.6], zoom_start=4, tiles=None, control_scale=False)
+    folium.TileLayer(tiles="CartoDB dark_matter", name="Terminal Base", control=False).add_to(m)
+    folium.Choropleth(
+        geo_data=geojson,
+        name="choropleth",
+        data=_choropleth_df,
+        columns=["state_name", "branchCount"],
+        key_on="feature.id",
+        fill_color="YlOrBr",
+        fill_opacity=0.82,
+        line_opacity=0.45,
+        line_color="#fbbf24",
+        line_weight=1.8,
+        legend_name="Branch Data",
+    ).add_to(m)
+    for point in _city_points:
+        popup_html = f"""
     <div style='font-family: VT323, monospace; min-width: 220px;'>
       <strong>{point['city']}, {point['state']}</strong><br>
       Branches: {point['branchCount']}
     </div>
     """
-    marker_radius = max(3, point["branchCount"] * 0.75)
+        marker_radius = max(3, point["branchCount"] * 0.75)
+        folium.CircleMarker(
+            location=[point["lat"], point["lon"]],
+            radius=marker_radius,
+            color="#f59e0b",
+            weight=2,
+            fill=True,
+            fill_color="#22d3ee",
+            fill_opacity=0.88,
+            tooltip=f"{point['city']}, {point['state']} | Branches: {point['branchCount']}",
+            popup=folium.Popup(popup_html, max_width=280),
+        ).add_to(m)
+    return m
 
-    folium.CircleMarker(
-        location=[point["lat"], point["lon"]],
-        radius=marker_radius,
-        color="#f59e0b",
-        weight=2,
-        fill=True,
-        fill_color="#22d3ee",
-        fill_opacity=0.88,
-        tooltip=f"{point['city']}, {point['state']} | Branches: {point['branchCount']}",
-        popup=folium.Popup(popup_html, max_width=280),
-    ).add_to(terminal_map)
 
+terminal_map = build_terminal_map(choropleth_df, city_points)
 terminal_map.get_root().html.add_child(folium.Element("""
 <style>
 .folium-map {
@@ -194,6 +206,8 @@ terminal_map.get_root().html.add_child(folium.Element("""
 }
 </style>
 """))
+
+
 
 st.markdown(
     """
