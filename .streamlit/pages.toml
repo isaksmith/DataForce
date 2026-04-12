@@ -1,7 +1,11 @@
 [[pages]]
 path = "DataForce.py"
-name = "Explorer"
+name = "DataForce"
 icon = ":material/home:"
+
+[[pages]]
+path = "pages/0_Explorer.py"
+name = "Explorer"
 
 [[pages]]
 path = "pages/1_Branches.py"
