@@ -3,6 +3,7 @@ import folium
 import pandas as pd
 import streamlit as st
 from streamlit_folium import st_folium
+from typing import Union
 
 st.set_page_config(page_title="MAGI Dashboard", layout="wide")
 
@@ -76,7 +77,7 @@ US_GEOJSON_URL = "https://raw.githubusercontent.com/python-visualization/folium/
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
-def fetch_us_geojson() -> dict | str:
+def fetch_us_geojson() -> Union[dict, str]:
     """Fetch and cache the US states GeoJSON. Falls back to URL string on error."""
     try:
         resp = requests.get(US_GEOJSON_URL, timeout=8)
