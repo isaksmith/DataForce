@@ -15,7 +15,7 @@ except Exception as _import_err:
     _import_err_msg = str(_import_err)
 
 if not _DEPS_OK:
-    st.title("Customer Simulation")
+    st.title("Customer Simulations - In Progress")
     st.warning(
         "This page is unavailable in the current environment because one or more "
         f"dependencies could not be loaded: `{_import_err_msg}`"
@@ -30,7 +30,7 @@ _FULL_PATH = ARTIFACTS_DIR / "customer_personas.json"
 _SAMPLE_PATH = ARTIFACTS_DIR / "customer_personas_sample.json"
 PERSONA_PATH = _FULL_PATH if _FULL_PATH.exists() else _SAMPLE_PATH
 
-st.title("Customer Simulation")
+st.title("Customer Simulations - In Progress")
 
 st.markdown(
     """
