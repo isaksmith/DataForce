@@ -2,51 +2,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from dataforce_utils import apply_global_font, add_download, load_csv, plot_value_counts, render_overview, render_preview, render_r_blurb
+from dataforce_utils import apply_global_font, add_download, canonicalize_channel, canonicalize_feature, load_csv, plot_value_counts, render_overview, render_preview, render_r_blurb
 
 apply_global_font()
-
-
-def canonicalize_channel(value: str) -> str:
-    raw = str(value).strip().lower()
-    if raw in {"web", "www", "browser"}:
-        return "Web"
-    if raw in {"mobile", "moble", "phone", "app"}:
-        return "Mobile"
-    if raw in {"unknown", "nan", "none", ""}:
-        return "Unknown"
-    return raw.title()
-
-
-def canonicalize_feature(value: str) -> str:
-    raw = str(value).strip().lower()
-    normalized = raw.replace("-", "_").replace("/", "_").replace(" ", "_")
-    mapping = {
-        "login": "Login",
-        "signin": "Login",
-        "sign_in": "Login",
-        "billpay": "Bill Pay",
-        "bill_pay": "Bill Pay",
-        "balancecheck": "Balance Check",
-        "balance_check": "Balance Check",
-        "bal_chk": "Balance Check",
-        "transfer": "Transfer",
-        "funds_transfer": "Transfer",
-        "xfer": "Transfer",
-        "mobile_deposit": "Mobile Deposit",
-        "mdeposit": "Mobile Deposit",
-        "mobiledeposit": "Mobile Deposit",
-        "statement_download": "Statement Download",
-        "stmt_dl": "Statement Download",
-        "statement": "Statement Download",
-        "open_acct": "New Account",
-        "new_account": "New Account",
-    }
-    if normalized in mapping:
-        return mapping[normalized]
-    if normalized in {"unknown", "nan", "none", ""}:
-        return "Unknown"
-    return raw.title()
 
 
 st.title("Digital Sessions")

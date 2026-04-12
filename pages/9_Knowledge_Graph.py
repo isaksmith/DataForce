@@ -1,13 +1,67 @@
-import math
-
-import plotly.graph_objects as go
 import streamlit as st
+from streamlit_agraph import Config as AGraphConfig, Edge, Node, agraph
 
 from dataforce_utils import apply_global_font
 
 apply_global_font()
 st.title("Knowledge Graph")
 st.caption("Explore a separate relationship graph for each dataset to understand its keys, dependencies, and downstream links.")
+
+
+def format_graph_label(value: str) -> str:
+    """Convert snake_case graph labels into readable title text."""
+    return str(value).replace("_", " ").strip().title()
+
+
+def render_interactive_graph(graph: dict) -> None:
+    color_map = {
+        "dataset": "#2563eb",
+        "field": "#059669",
+        "key": "#111827",
+        "related": "#d97706",
+    }
+
+    graph_nodes = []
+    for node in graph["nodes"]:
+        size = 36 if node["group"] == "dataset" else 28 if node["group"] == "key" else 24
+        graph_nodes.append(
+            Node(
+                id=node["id"],
+                label=format_graph_label(node["label"]),
+                title=node["details"],
+                size=size,
+                color=color_map.get(node["group"], "#334155"),
+                shape="dot",
+                font={"color": "#ffffff", "strokeWidth": 6, "strokeColor": "#000000", "size": 14},
+            )
+        )
+
+    graph_edges = [
+        Edge(source=source, target=target, label=label, color="#94a3b8")
+        for source, target, label in graph["links"]
+    ]
+
+    config = AGraphConfig(
+        width="100%",
+        height=760,
+        directed=True,
+        physics=True,
+        hierarchical=False,
+        nodeHighlightBehavior=True,
+        highlightColor="#dbeafe",
+        collapsible=False,
+        staticGraph=False,
+        staticGraphWithDragAndDrop=False,
+        link={'labelProperty': 'label', 'renderLabel': True},
+        nodeSpacing=220,
+        levelSeparation=220,
+        springLength=240,
+        springConstant=0.02,
+        damping=0.35,
+    )
+
+    agraph(nodes=graph_nodes, edges=graph_edges, config=config)
+
 
 graphs = {
     "customers.csv": {
@@ -122,89 +176,8 @@ graphs = {
 
 selected = st.selectbox("Dataset graph", list(graphs.keys()))
 graph = graphs[selected]
-
-color_map = {
-    "dataset": "#2563eb",
-    "field": "#059669",
-    "key": "#111827",
-    "related": "#d97706",
-}
-
-nodes = graph["nodes"]
-links = graph["links"]
-radius = 1.0
-angles = [2 * math.pi * i / len(nodes) for i in range(len(nodes))]
-positions = {
-    node["id"]: (radius * math.cos(angle), radius * math.sin(angle))
-    for node, angle in zip(nodes, angles)
-}
-
-edge_x = []
-edge_y = []
-for source, target, _label in links:
-    x0, y0 = positions[source]
-    x1, y1 = positions[target]
-    edge_x.extend([x0, x1, None])
-    edge_y.extend([y0, y1, None])
-
-edge_trace = go.Scatter(
-    x=edge_x,
-    y=edge_y,
-    line=dict(width=1.8, color="#94a3b8"),
-    hoverinfo="none",
-    mode="lines",
-)
-
-node_x, node_y, node_text, node_hover, node_color, node_size = [], [], [], [], [], []
-for node in nodes:
-    x, y = positions[node["id"]]
-    node_x.append(x)
-    node_y.append(y)
-    node_text.append(node["label"])
-    node_hover.append(f"<b>{node['label']}</b><br>{node['details']}")
-    node_color.append(color_map.get(node["group"], "#334155"))
-    node_size.append(34 if node["group"] == "key" else 50)
-
-node_trace = go.Scatter(
-    x=node_x,
-    y=node_y,
-    mode="markers+text",
-    text=node_text,
-    textposition="middle center",
-    hovertext=node_hover,
-    hoverinfo="text",
-    marker=dict(size=node_size, color=node_color, line=dict(width=2, color="#ffffff")),
-    textfont=dict(color="#ffffff", size=11),
-)
-
-annotations = []
-for source, target, label in links:
-    x0, y0 = positions[source]
-    x1, y1 = positions[target]
-    annotations.append(
-        dict(
-            x=(x0 + x1) / 2,
-            y=(y0 + y1) / 2,
-            text=label,
-            showarrow=False,
-            font=dict(size=10, color="#475569"),
-            bgcolor="rgba(255,255,255,0.75)",
-        )
-    )
-
-fig = go.Figure(data=[edge_trace, node_trace])
-fig.update_layout(
-    showlegend=False,
-    hovermode="closest",
-    margin=dict(b=20, l=20, r=20, t=20),
-    annotations=annotations,
-    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-    height=760,
-)
-
-st.plotly_chart(fig, use_container_width=True)
+render_interactive_graph(graph)
 
 st.markdown("### Relationship notes")
-for source, target, label in links:
+for source, target, label in graph["links"]:
     st.markdown(f"- `{source}` **{label}** `{target}`")

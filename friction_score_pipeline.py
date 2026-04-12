@@ -513,12 +513,18 @@ def run_pipeline(
     """Run full friction-score pipeline and return one row per session."""
     score_weights = score_weights or SCORE_WEIGHTS
 
+    print(f"[friction_pipeline] loading customers from {data_dir / 'customers.csv'}", flush=True)
     customers = clean_customers(load_csv(data_dir / "customers.csv"))
+    print(f"[friction_pipeline] loading sessions from {data_dir / 'digital_sessions.csv'}", flush=True)
     sessions = clean_sessions(load_csv(data_dir / "digital_sessions.csv"))
+    print(f"[friction_pipeline] loading support interactions from {data_dir / 'support_interactions.csv'}", flush=True)
     support = clean_support_interactions(load_csv(data_dir / "support_interactions.csv"))
+    print(f"[friction_pipeline] loading error codes from {data_dir / 'error_codes.csv'}", flush=True)
     error_codes = clean_error_codes(load_csv(data_dir / "error_codes.csv"))
+    print(f"[friction_pipeline] loading feature costs from {data_dir / 'feature_costs.csv'}", flush=True)
     feature_costs = clean_feature_costs(load_csv(data_dir / "feature_costs.csv"))
 
+    print("[friction_pipeline] building friction scores", flush=True)
     scored = build_friction_score(
         sessions=sessions,
         customers=customers,
@@ -528,6 +534,7 @@ def run_pipeline(
         risk_config=RISK_CONFIG,
     )
 
+    print("[friction_pipeline] computing support follow-up flags", flush=True)
     scored["support_followup_24h"] = compute_support_followup_flags(scored, support, hours=24)
     scored["support_followup_72h"] = compute_support_followup_flags(scored, support, hours=72)
 
