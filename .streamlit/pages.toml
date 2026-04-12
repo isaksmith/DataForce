@@ -35,7 +35,3 @@ name = "Support Interactions"
 path = "pages/Customer_Simulations.py"
 name = "Customer Simulations"
 
-[[pages]]
-path = "pages/8_Dashboard.py"
-name = "Dashboard"
-hidden = true
