@@ -31,8 +31,7 @@ ui <- fluidPage(
     mainPanel(
       fluidRow(
         column(4, wellPanel(h4("Rows"), textOutput("rows"))),
-        column(4, wellPanel(h4("Columns"), textOutput("cols"))),
-        column(4, wellPanel(h4("Missing values"), textOutput("missing")))
+        column(4, wellPanel(h4("Columns"), textOutput("cols")))
       ),
       plotlyOutput("plot", height = "420px"),
       DTOutput("table")
@@ -62,7 +61,6 @@ server <- function(input, output, session) {
 
   output$rows <- renderText(nrow(filtered_data()))
   output$cols <- renderText(ncol(filtered_data()))
-  output$missing <- renderText(sum(is.na(filtered_data())))
 
   output$table <- renderDT({
     datatable(head(filtered_data(), 500), options = list(scrollX = TRUE, pageLength = 10))

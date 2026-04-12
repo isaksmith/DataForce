@@ -21,10 +21,9 @@ if filter_col != "None":
     if chosen:
         filtered = filtered[filtered[filter_col].astype(str).isin(chosen)]
 
-c1, c2, c3 = st.columns(3)
+c1, c2 = st.columns(2)
 c1.metric("Rows", f"{len(filtered):,}")
 c2.metric("Columns", f"{filtered.shape[1]:,}")
-c3.metric("Missing values", f"{int(filtered.isna().sum().sum()):,}")
 
 label = selected
 fig = None

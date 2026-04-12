@@ -305,10 +305,9 @@ def load_csv(name: str) -> pd.DataFrame:
 
 
 def render_overview(df: pd.DataFrame) -> None:
-    c1, c2, c3 = st.columns(3)
+    c1, c2 = st.columns(2)
     c1.metric("Rows", f"{len(df):,}")
     c2.metric("Columns", f"{df.shape[1]:,}")
-    c3.metric("Missing values", f"{int(df.isna().sum().sum()):,}")
 
 
 def render_preview(df: pd.DataFrame) -> None:
