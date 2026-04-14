@@ -5,7 +5,7 @@ import streamlit as st
 from streamlit_folium import st_folium
 from typing import Union
 
-st.set_page_config(page_title="MAGI Dashboard", layout="wide")
+st.set_page_config(page_title="DataForce", layout="wide")
 
 branches = pd.read_csv("Hack The Plains 2026 Datasets/branches.csv")
 
@@ -317,28 +317,12 @@ with left:
     st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
     st.markdown("<div class='terminal-card'><div class='terminal-label'>ERROR TRACKING</div><div class='terminal-value'>ERR_AUTH: 15K</div><div class='terminal-value'>ERR_TIMEOUT: 8K</div><div class='terminal-value'>ERR_DEPOSIT: 5K</div></div>", unsafe_allow_html=True)
     st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='terminal-card'><div class='terminal-label'>COST PER FEATURE</div><div class='terminal-value'>SUCCESSFUL TRANSACTION: $0.01</div><div class='terminal-value'>FAILED TRANSACTION: $12.00</div></div>", unsafe_allow_html=True)
+    st.markdown("<div class='terminal-card'><div class='terminal-label'>SESSION LOGS</div><div class='terminal-value'>FAILED PATHWAYS: 96,000</div></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
+    st.markdown("<div class='terminal-card'><div class='terminal-label'>SUPPORT ALERTS</div><div class='terminal-value'>LIVE TICKETS: 65,000</div></div>", unsafe_allow_html=True)
 
 with center:
     st_folium(terminal_map, use_container_width=True, height=520)
-    st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
-    st.markdown(
-        """
-        <div class='terminal-card' style='margin-bottom:1rem;'>
-          <div style='display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; margin-bottom:1rem;'>
-            <div style='border:1px solid #f59e0b; padding:0.75rem; background:#111827;'><div class='terminal-label'>DEMOGRAPHICS</div><div class='terminal-value'>ACTIVE PROFILES: 355,000</div></div>
-            <div style='border:1px solid #f59e0b; padding:0.75rem; background:#111827;'><div class='terminal-label'>SESSION LOGS</div><div class='terminal-value'>FAILED PATHWAYS: 96,000</div></div>
-            <div style='border:1px solid #f59e0b; padding:0.75rem; background:#111827;'><div class='terminal-label'>SUPPORT ALERTS</div><div class='terminal-value'>LIVE TICKETS: 65,000</div></div>
-          </div>
-          <div style='border:1px solid #ef4444; background:#220808; padding:1.25rem; text-align:center;'>
-            <div style='font-size:0.8rem; letter-spacing:0.28em; color:#fca5a5; margin-bottom:0.8rem;'>TOTAL FRICTION COST</div>
-            <div style='font-size:3.5rem; font-weight:800; color:#f87171;'>$12,450.00</div>
-            <div style='margin-top:0.9rem; border:1px solid #f59e0b; background:#000; padding:0.7rem; color:#fcd34d; font-size:1rem; letter-spacing:0.2em;'>SYSTEM INTERVENTION: REQUIRED</div>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
 with right:
     st.markdown("<div class='terminal-card'><div class='terminal-label'>CUSTOMER DEMOGRAPHICS</div><div class='terminal-value'>ACTIVE PROFILES: 355,000</div></div>", unsafe_allow_html=True)
@@ -346,3 +330,14 @@ with right:
     st.markdown("<div class='terminal-card'><div class='terminal-label'>SUPPORT SATURATION</div><div class='terminal-value'>LIVE TICKETS: 65,000</div><div class='terminal-value'>AGENT LOAD: 92%</div></div>", unsafe_allow_html=True)
     st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
     st.markdown("<div class='terminal-card'><div class='terminal-label'>AVG FRICTION SCORE</div><div style='border:1px solid #ef4444; background:#450a0a; color:#fca5a5; padding:0.9rem; text-align:center; font-size:2.3rem; line-height:1.0; font-weight:800;'>22.55</div></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div style='border:1px solid #ef4444; background:#220808; padding:0.6rem; text-align:center;'>
+          <div style='font-size:0.7rem; letter-spacing:0.22em; color:#fca5a5; margin-bottom:0.4rem;'>TOTAL FRICTION COST</div>
+          <div style='font-size:2rem; font-weight:800; color:#f87171; line-height:1.0;'>$12,450.00</div>
+          <div style='margin-top:0.4rem; border:1px solid #f59e0b; background:#000; padding:0.35rem; color:#fcd34d; font-size:0.8rem; letter-spacing:0.15em;'>SYSTEM INTERVENTION: REQUIRED</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
