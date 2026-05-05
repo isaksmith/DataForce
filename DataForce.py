@@ -72,7 +72,6 @@ def fetch_us_geojson() -> Union[dict, str]:
         return US_GEOJSON_URL
 
 
-@st.cache_resource(show_spinner=False)
 def build_terminal_map(
     _choropleth_df: pd.DataFrame,
 ) -> folium.Map:
