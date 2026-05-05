@@ -96,8 +96,8 @@ def fetch_us_geojson() -> Union[dict, str]:
 @st.cache_resource(show_spinner=False)
 def build_terminal_map(_choropleth_df_json: str, _city_points_json: str) -> folium.Map:
     """Build and cache the Folium map so it isn't rebuilt on every rerun."""
-    _choropleth_df = pd.read_json(_choropleth_df_json)
-    _city_points = pd.read_json(_city_points_json).to_dict(orient="records")
+  _choropleth_df = pd.DataFrame(pd.read_json(_choropleth_df_json, orient="records"))
+  _city_points = pd.DataFrame(pd.read_json(_city_points_json, orient="records")).to_dict(orient="records")
     geojson = fetch_us_geojson()
     m = folium.Map(location=[39.8, -98.6], zoom_start=4, tiles=None, control_scale=False)
     folium.TileLayer(tiles="CartoDB dark_matter", name="Terminal Base", control=False).add_to(m)
