@@ -7,7 +7,13 @@ from typing import Union
 
 st.set_page_config(page_title="DataForce", layout="wide")
 
-branches = pd.read_csv("Hack The Plains 2026 Datasets/branches.csv")
+
+@st.cache_data(show_spinner=False)
+def load_branches() -> pd.DataFrame:
+    return pd.read_csv("Hack The Plains 2026 Datasets/branches.csv")
+
+
+branches = load_branches()
 
 city_coordinates = {
     ("KS", "Emporia"): (38.4040, -96.1817),
@@ -87,8 +93,11 @@ def fetch_us_geojson() -> Union[dict, str]:
         return US_GEOJSON_URL
 
 
-def build_terminal_map(_choropleth_df: pd.DataFrame, _city_points: list) -> folium.Map:
+@st.cache_resource(show_spinner=False)
+def build_terminal_map(_choropleth_df_json: str, _city_points_json: str) -> folium.Map:
     """Build and cache the Folium map so it isn't rebuilt on every rerun."""
+  _choropleth_df = pd.read_json(_choropleth_df_json)
+  _city_points = pd.read_json(_city_points_json).to_dict(orient="records")
     geojson = fetch_us_geojson()
     m = folium.Map(location=[39.8, -98.6], zoom_start=4, tiles=None, control_scale=False)
     folium.TileLayer(tiles="CartoDB dark_matter", name="Terminal Base", control=False).add_to(m)
@@ -124,11 +133,7 @@ def build_terminal_map(_choropleth_df: pd.DataFrame, _city_points: list) -> foli
             tooltip=f"{point['city']}, {point['state']} | Branches: {point['branchCount']}",
             popup=folium.Popup(popup_html, max_width=280),
         ).add_to(m)
-    return m
-
-
-terminal_map = build_terminal_map(choropleth_df, city_points)
-terminal_map.get_root().html.add_child(folium.Element("""
+    m.get_root().html.add_child(folium.Element("""
 <style>
 .folium-map {
   border: 1px solid #f59e0b;
@@ -206,6 +211,13 @@ terminal_map.get_root().html.add_child(folium.Element("""
 }
 </style>
 """))
+    return m
+
+
+terminal_map = build_terminal_map(
+    choropleth_df.to_json(orient="records"),
+    pd.DataFrame(city_points).to_json(orient="records"),
+)
 
 
 
@@ -322,7 +334,10 @@ with left:
     st.markdown("<div class='terminal-card'><div class='terminal-label'>SUPPORT ALERTS</div><div class='terminal-value'>LIVE TICKETS: 65,000</div></div>", unsafe_allow_html=True)
 
 with center:
-    st_folium(terminal_map, use_container_width=True, height=520)
+  try:
+    st_folium(terminal_map, width="stretch", height=520)
+  except Exception as exc:
+    st.warning(f"Map unavailable in this environment: `{exc}`")
 
 with right:
     st.markdown("<div class='terminal-card'><div class='terminal-label'>CUSTOMER DEMOGRAPHICS</div><div class='terminal-value'>ACTIVE PROFILES: 355,000</div></div>", unsafe_allow_html=True)

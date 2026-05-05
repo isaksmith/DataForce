@@ -1,11 +1,24 @@
 import streamlit as st
-from streamlit_agraph import Config as AGraphConfig, Edge, Node, agraph
+
+try:
+    from streamlit_agraph import Config as AGraphConfig, Edge, Node, agraph
+    _AGRAPH_OK = True
+    _AGRAPH_ERR = ""
+except Exception as _err:
+    _AGRAPH_OK = False
+    _AGRAPH_ERR = str(_err)
 
 from dataforce_utils import apply_global_font
 
 apply_global_font()
 st.title("Knowledge Graph")
 st.caption("Explore a separate relationship graph for each dataset to understand its keys, dependencies, and downstream links.")
+
+if not _AGRAPH_OK:
+    st.warning(
+        "Interactive graph rendering is unavailable in this deployment environment "
+        f"because `streamlit_agraph` could not be loaded: `{_AGRAPH_ERR}`"
+    )
 
 
 def format_graph_label(value: str) -> str:
@@ -14,6 +27,9 @@ def format_graph_label(value: str) -> str:
 
 
 def render_interactive_graph(graph: dict) -> None:
+    if not _AGRAPH_OK:
+        return
+
     color_map = {
         "dataset": "#2563eb",
         "field": "#059669",
@@ -176,7 +192,11 @@ graphs = {
 
 selected = st.selectbox("Dataset graph", list(graphs.keys()))
 graph = graphs[selected]
-render_interactive_graph(graph)
+
+if _AGRAPH_OK:
+    render_interactive_graph(graph)
+else:
+    st.info("Showing relationship notes only.")
 
 st.markdown("### Relationship notes")
 for source, target, label in graph["links"]:
