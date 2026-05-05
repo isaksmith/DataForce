@@ -334,7 +334,9 @@ with center:
     try:
         st_folium(terminal_map, width="stretch", height=520)
     except Exception as exc:
-        st.warning(f"Map unavailable in this environment: `{exc}`")
+        import traceback
+        st.error(f"Map failed to render: {exc}")
+        st.write(traceback.format_exc())
 
 with right:
     st.markdown("<div class='terminal-card'><div class='terminal-label'>CUSTOMER DEMOGRAPHICS</div><div class='terminal-value'>ACTIVE PROFILES: 355,000</div></div>", unsafe_allow_html=True)
