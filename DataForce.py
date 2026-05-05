@@ -37,27 +37,6 @@ city_coordinates = {
     ("MO", "Tulsa"): (37.2089, -93.2923),
 }
 
-city_summary = (
-    branches.groupby(["branch_state", "branch_city"])
-    .size()
-    .reset_index(name="branches")
-)
-
-city_points = []
-for row in city_summary.itertuples():
-    coords = city_coordinates.get((row.branch_state, row.branch_city))
-    if coords is None:
-        continue
-    city_points.append(
-        {
-            "state": row.branch_state,
-            "city": row.branch_city,
-            "lat": coords[0],
-            "lon": coords[1],
-            "branchCount": int(row.branches),
-        }
-    )
-
 state_code_to_name = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
     "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware", "FL": "Florida", "GA": "Georgia",
@@ -96,9 +75,30 @@ def fetch_us_geojson() -> Union[dict, str]:
 @st.cache_resource(show_spinner=False)
 def build_terminal_map(
     _choropleth_df: pd.DataFrame,
-    _city_points: list,
 ) -> folium.Map:
     """Build and cache the Folium map so it isn't rebuilt on every rerun."""
+    # Compute city_points inside the cached function so no unhashable list is passed
+    _branches = load_branches()
+    _city_summary = (
+        _branches.groupby(["branch_state", "branch_city"])
+        .size()
+        .reset_index(name="branches")
+    )
+    _city_points = []
+    for _row in _city_summary.itertuples():
+        _coords = city_coordinates.get((_row.branch_state, _row.branch_city))
+        if _coords is None:
+            continue
+        _city_points.append(
+            {
+                "state": _row.branch_state,
+                "city": _row.branch_city,
+                "lat": _coords[0],
+                "lon": _coords[1],
+                "branchCount": int(_row.branches),
+            }
+        )
+
     geojson = fetch_us_geojson()
     m = folium.Map(location=[39.8, -98.6], zoom_start=4, tiles=None, control_scale=False)
     folium.TileLayer(tiles="CartoDB dark_matter", name="Terminal Base", control=False).add_to(m)
@@ -215,7 +215,7 @@ def build_terminal_map(
     return m
 
 
-terminal_map = build_terminal_map(choropleth_df, city_points)
+terminal_map = build_terminal_map(choropleth_df)
 
 
 st.markdown(
